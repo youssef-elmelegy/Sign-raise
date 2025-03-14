@@ -13,7 +13,7 @@
   "description": "",
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^6.0.0",
+    "@prisma/client": "^6.5.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -22,9 +22,11 @@
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.16",
-    "prisma": "^6.0.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "prisma": "^6.5.0"
   }
 }
