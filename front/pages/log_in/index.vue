@@ -43,14 +43,14 @@ const logIn = handleSubmit(async (data) => {
     <inputField name="email" label="Email" />
     <inputField name="password" label="Password" type="password" />
     <TheButton :disabled="isSubmitting" type="submit" >
-      {{ isSubmitting ? "Creating account..." : "Create account" }}
+      {{ isSubmitting ? "login..." : "login" }}
       <img
           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAy0lEQVR4nM3TUUqCURAF4J+MelFXILmKENTA1Si1CteQuQJRtxDtxUpsEb59MXTJ+Pv/bqAPnrfLmTn3cGamKE4N3GGJLfb4wBrDXGMDc7zhAV1coYMxXhN/WSfwhBe0a/gmnkOkiuxhE0UZl63kcJBJ4gBMS+8JVsV/4QvfIriJYKuKchil2uuYzjEOutgdk8F97Em56DbNOTeFNt7RryJnaQ9afzQHP6tTv8BjaRMjsEg9bMfP8Un1Jv4QGmCRGuIWduk2fts+C3wCojcuU/AEC20AAAAASUVORK5CYII="
           alt="login-rounded-right"
       />
     </TheButton>
     <p v-show="loginErrorMessage" class="text-red-500 border border-red-200 bg-red-300 text-sm">{{ loginErrorMessage }}</p>
-    <p class="text-center text-sm mt-4">
+    <p class="text-center text-sm">
       Don't have an account? <NuxtLink to="/sign_up" class="text-purple-heart-400">Sign Up</NuxtLink>
     </p>
   </form>

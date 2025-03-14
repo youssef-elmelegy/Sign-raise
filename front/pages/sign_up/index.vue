@@ -2,14 +2,16 @@
 import { useForm} from "@formwerk/core";
 import { userSchema } from "~/schema/userSchema";
 import apiClient from "~/utils/apiClient";
+
 const showErrors = ref('');
 const schema = userSchema;
+const showVerification = ref(false);
 const {isSubmitting, handleSubmit } = useForm({schema});
 
 const submitUser = handleSubmit(async (data) => {
   try {
    const  response = await apiClient.post("/api/auth/signup", data);
-
+    showVerification.value = true;
   } catch (error) {
     if (
       error.response &&
@@ -24,7 +26,9 @@ const submitUser = handleSubmit(async (data) => {
   }
 });
 
-
+const closePopup = () => {
+  showVerification.value = false;
+};
 </script>
 
 <template>
@@ -37,9 +41,10 @@ const submitUser = handleSubmit(async (data) => {
       Sign Up
     </TheButton>
     <p v-show="showErrors" class="text-red-500 border border-red-200 bg-red-300 text-sm">{{ showErrors }}</p>
-    <p class="text-center text-sm mt-4">
+    <p class="text-center text-sm">
       Already have an account? <NuxtLink to="/log_in" class="text-purple-heart-400">Log In</NuxtLink>
     </p>
   </form>
+  <VerifyEmail v-if="showVerification" @close="closePopup" />
 
 </template>
