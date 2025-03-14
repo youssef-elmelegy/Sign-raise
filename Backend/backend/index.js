@@ -1,4 +1,6 @@
 import express from "express";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import cors from "cors"; // Import cors
 import { connectDB } from "./db/connectDB.js";
@@ -23,12 +25,47 @@ app.use(cookieParser());
 
 connectDB();
 
+const specs = swaggerJsdoc(
+    {
+      definition: {
+        openapi: "3.1.0",
+        info: {
+          title: "Dinamow is the king",
+          version: "1.0.0",
+          description:
+              "this docs have been done by the king of the world",
+          license: {
+            name: "MIT",
+            url: "https://spdx.org/licenses/MIT.html",
+          },
+          contact: {
+            name: "DINAMOW",
+            url: "http://127.0.0.1:3000/",
+            email: "meemoo102039@gmail.com",
+          },
+        },
+        servers: [
+          {
+            url: "http://localhost:3000",
+          },
+        ],
+      },
+      apis: ["./routes/*.js"],
+    }
+);
+
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(specs, { explorer: true })
+);
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
 app.use("/api/auth", authRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on ${PORT}`);
 });
