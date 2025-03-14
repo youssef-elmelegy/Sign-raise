@@ -1,0 +1,10 @@
+
+
+<template>
+
+
+    <NuxtPage />
+
+
+
+</template>
