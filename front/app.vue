@@ -1,3 +1,4 @@
 <template>
-<NuxtPage />
+    <Navbar />
+    <NuxtPage />
 </template>
