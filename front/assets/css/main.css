@@ -1,1 +1,14 @@
 @import "tailwindcss";
+@theme{
+    --color-purple-heart-50: #edf0ff;
+    --color-purple-heart-100: #dfe2ff;
+    --color-purple-heart-200: #c5caff;
+    --color-purple-heart-300: #a1a5ff;
+    --color-purple-heart-400: #817cfd;
+    --color-purple-heart-500: #6e5df7;
+    --color-purple-heart-600: #5f3fec;
+    --color-purple-heart-700: #5232d0;
+    --color-purple-heart-800: #432ba8;
+    --color-purple-heart-900: #3a2a85;
+    --color-purple-heart-950: #23194d;
+}
