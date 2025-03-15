@@ -19,6 +19,17 @@ model User {
   verificationToken          String?
   verificationTokenExpiresAt DateTime?
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  UserRoom  UserRoom[]
+}
+
+model UserRoom {
+  id        String   @id @default(uuid())
+  userId    String
+  roomId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  User User @relation(fields: [userId], references: [id])
 }
