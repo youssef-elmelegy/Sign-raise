@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
+import dailyRoutes from "./routes/daily.route.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,7 +14,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const CLIENT_URL = process.env.CLIENT_URL;
+// const CLIENT_URL = process.env.CLIENT_URL;
 
 app.use(cors());
 
@@ -70,6 +71,7 @@ res.send("Hello World!");
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/daily", dailyRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Server is running on ${PORT}`);
