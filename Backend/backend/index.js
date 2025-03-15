@@ -26,30 +26,42 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const specs = swaggerJsdoc({
-definition: {
-  openapi: "3.1.0",
-  info: {
-    title: "Dinamow is the king",
-    version: "1.0.0",
-    description: "this docs have been done by the king of the world",
-    license: {
-      name: "MIT",
-      url: "https://spdx.org/licenses/MIT.html",
+  definition: {
+    openapi: "3.1.0",
+    info: {
+      title: "Dinamow is the king",
+      version: "1.0.0",
+      description: "this docs have been done by the king of the world",
+      license: {
+        name: "MIT",
+        url: "https://spdx.org/licenses/MIT.html",
+      },
+      contact: {
+        name: "DINAMOW",
+        url: "http://127.0.0.1:3000/",
+        email: "meemoo102039@gmail.com",
+      },
     },
-    contact: {
-      name: "DINAMOW",
-      url: "http://127.0.0.1:3000/",
-      email: "meemoo102039@gmail.com",
+    servers: [
+      {
+        url: "http://localhost:3000",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
     },
+    // (Optional) Apply globally to all endpoints:
+    security: [{ bearerAuth: [] }],
   },
-  servers: [
-    {
-      url: "http://localhost:3000",
-    },
-  ],
-},
-apis: [path.join(__dirname, "./routes/*.js")],
+  apis: [path.join(__dirname, "./routes/*.js")],
 });
+
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
