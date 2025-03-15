@@ -9,6 +9,7 @@ import Landing from '@/components/Landing.vue'
             <FeaturesSection />
             <StatsSection />
             <ResourcesSection />
+            <CallToAction />
         </main>
     </div>
 </template>
