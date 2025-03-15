@@ -4,6 +4,7 @@
         <main class="flex-grow">
             <NuxtPage />
         </main>
+        <AppFooter />
     </div>
 </template>
 
