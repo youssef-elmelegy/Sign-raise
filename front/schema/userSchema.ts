@@ -32,7 +32,7 @@ export const userSchema = v.object(
     },
 );
 export const loginSchema = v.object({
-    identifier: v.union([emailSchema, nameSchema]),
+    email: emailSchema,
     password: passwordSchema,
 });
 
