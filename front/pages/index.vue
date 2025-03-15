@@ -7,6 +7,7 @@ import Landing from '@/components/Landing.vue'
         <main class="flex-grow">
             <HeroSection />
             <FeaturesSection />
+            <StatsSection />
         </main>
     </div>
 </template>
