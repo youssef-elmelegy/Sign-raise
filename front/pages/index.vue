@@ -3,7 +3,9 @@ import Landing from '@/components/Landing.vue'
 </script>
 
 <template>
-    <div>
-        <Landing />
+    <div class="min-h-screen flex flex-col">
+        <main class="flex-grow">
+            <HeroSection />
+        </main>
     </div>
 </template>
