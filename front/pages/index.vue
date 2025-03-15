@@ -8,6 +8,7 @@ import Landing from '@/components/Landing.vue'
             <HeroSection />
             <FeaturesSection />
             <StatsSection />
+            <ResourcesSection />
         </main>
     </div>
 </template>
