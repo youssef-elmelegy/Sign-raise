@@ -50,9 +50,13 @@
 
             <div>
                 <NuxtLink to="/sign_up">
-                    <TheButton>
+                    <button
+                        class="bg-purple-heart-600 text-white px-7 py-2 rounded-full text-lg font-medium hover:bg-purple-heart-700 transition shadow-lg cursor-pointer">
                         Sign Up
-                    </TheButton>
+                    </button>
+                    <!-- <TheButton>
+                        Sign Up
+                    </TheButton> -->
                 </NuxtLink>
             </div>
 
