@@ -95,7 +95,7 @@ export const login = async (req, res) => {
       success: true,
       message: "Logged in successfully",
       user: {
-        ...user._doc,
+        ...user,
         password: undefined,
       },
     });
