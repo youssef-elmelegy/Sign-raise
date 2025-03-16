@@ -3,15 +3,12 @@ import { dailyAxios } from "../utils/dailyAxois.js";
 import prisma from "../db/connectDB.js";
 
 const __getUser = async (userId) => {
-  try{
-    return await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    })
-  }catch (error) {
-    // TODO: Log error
-  }
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
 }
 
 const __createRoom = async (user, room) => {
