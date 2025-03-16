@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@daily-co/daily-js": "^0.76.0",
     "@formwerk/core": "^0.9.2",
     "@nuxt/eslint": "^1.2.0",
     "@nuxt/image": "^1.9.0",
