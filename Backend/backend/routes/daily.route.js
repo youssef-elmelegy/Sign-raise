@@ -31,7 +31,7 @@ const router = express.Router();
   *                 type: object
   *                 example: {}
   *                 description: Properties of the room
-*     responses:
+  *     responses:
   *       201:
   *         description: Room created successfully
   *         content:
@@ -39,17 +39,6 @@ const router = express.Router();
   *             schema:
   *               type: object
   *               properties:
-  *                 success:
-  *                   type: boolean
-  *                   example: true
-  *                   description: Indicates if the request was successful
-  *                 message:
-  *                   type: string
-  *                   example: Room created successfully
-  *                   description: Response message
-  *                 room:
-  *                   type: object
-  *                   properties:
   *                     id:
   *                       type: string
   *                       example: e0f4d14b-aa66-4af5-b631-4e39e3aeee07
@@ -79,6 +68,21 @@ const router = express.Router();
   *                       type: object
   *                       example: {}
   *                       description: Configuration of the room
+  *       400:
+  *         description: Bad Request
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 error:
+  *                   type: string
+  *                   example: invalid-request-error
+  *                   description: Error type
+  *                 info:
+  *                   type: string
+  *                   example: a room named hot-room1 already exists
+  *                   description: Error information
   */
 router.post("/rooms", createRoom);
 
