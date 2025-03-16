@@ -6,7 +6,7 @@
                 Join thousands of users who are already transforming how they communicate with the deaf community.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <NuxtLink to="/sign-up">
+                <NuxtLink to="/sign_up">
                     <button
                         class="bg-white text-purple-heart-600 px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-50 transition shadow-lg cursor-pointer">
                         Get Started for Free
