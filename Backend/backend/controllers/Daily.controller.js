@@ -22,13 +22,12 @@ export const createRoom = async (req, res) => {
       properties,
     };
 
-    const { data: newRoom } = await dailyAxios.post("/rooms", room);
+    dailyAxios.post("/rooms", room).then(async (response) => {
+      res.status(200).send(response.data);
+    }).catch((error) => {
+      res.status(error.status).send(error.response.data);
+    })
 
-    res.status(201).json({
-      success: true,
-      message: "Room created successfully",
-      room: newRoom,
-    });
   } catch (error) {
     res.status(400).json({
       success: false,
