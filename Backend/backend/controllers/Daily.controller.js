@@ -1,31 +1,26 @@
-// import prisma from "../db/connectDB.js";
 import { dailyAxios } from "../utils/dailyAxois.js";
 import prisma from "../db/connectDB.js";
 
 const __getUser = async (userId) => {
   return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
+    where: { id: userId },
   });
-
-}
+};
 
 const __createRoom = async (user, room) => {
-  console.log(room);
+  console.log(`the data: ${room}`);
   return prisma.userRoom.create({
     data: {
       userId: user.id,
       roomId: room.id,
     },
   });
-}
-
+};
 
 export const createRoom = async (req, res) => {
   const { name, privacy, properties } = req.body;
-  let data = ''
 
+  // Validate input early
   if (!name) {
     return res.status(400).json({ success: false, message: "Name is required" });
   }
@@ -37,26 +32,23 @@ export const createRoom = async (req, res) => {
   }
 
   try {
-    const room = {
-      name,
-      privacy,
-      properties,
-    };
+    const room = { name, privacy, properties };
 
-    dailyAxios.post("/rooms", room).then(async (res) => {
-      data = res.data;
-    }).catch((error) => {
-      res.status(error.status).send(error.response.data);
-    })
+    // Use async/await without mixing .then()/.catch()
+    const response = await dailyAxios.post("/rooms", room);
+    const data = response.data;
+
+    // Continue with room creation in your DB
     const user = await __getUser(req.userId);
-    if (! await __createRoom(user, data)) {
-      res.status(401).json({ success: false, message: "User already exists" });
-    }
-    res.status(200).send(data);
+    await __createRoom(user, data);
+
+    // Send final success response
+    return res.status(200).send(data);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    // Handle Axios error responses or any other error gracefully
+    if (error.response) {
+      return res.status(error.response.status).json(error.response.data);
+    }
+    return res.status(400).json({ success: false, message: error.message });
   }
-}
+};
