@@ -29,20 +29,21 @@ export const specs = swaggerJsdoc({
     ],
     components: {
       securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
+        cookieAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "token",
         },
       },
     },
-    // (Optional) Apply globally to all endpoints:
-    security: [{ bearerAuth: [] }],
+    // Apply cookie-based authentication globally to all endpoints:
+    security: [{ cookieAuth: [] }],
   },
   apis: [path.join(__dirname, "./routes/*.js")],
 });
 
 export const config = {
+  bind: '0.0.0.0',
   rtmp: {
     port: 1935,
     chunk_size: 60000,
@@ -53,5 +54,18 @@ export const config = {
   http: {
     port: 8000,
     allow_origin: '*',
+    mediaroot: './media',
+    api: true, // Enable the admin API
   },
+  relay: {
+    ffmpeg: '/usr/local/bin/ffmpeg',
+    tasks: [
+      {
+        app: 'live',
+        mode: 'push',
+        edge: 'rtmp://localhost:1935/live',
+      }
+    ]
+  }
 };
+
