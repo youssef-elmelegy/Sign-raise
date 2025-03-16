@@ -1,33 +1,61 @@
 // import prisma from "../db/connectDB.js";
 import { dailyAxios } from "../utils/dailyAxois.js";
+import prisma from "../db/connectDB.js";
+
+const __getUser = async (userId) => {
+  try{
+    return await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    })
+  }catch (error) {
+    // TODO: Log error
+  }
+}
+
+const __createRoom = async (user, room) => {
+  console.log(room);
+  return prisma.userRoom.create({
+    data: {
+      userId: user.id,
+      roomId: room.id,
+    },
+  });
+}
 
 
 export const createRoom = async (req, res) => {
   const { name, privacy, properties } = req.body;
+  let data = ''
+
+  if (!name) {
+    return res.status(400).json({ success: false, message: "Name is required" });
+  }
+  if (!privacy) {
+    return res.status(400).json({ success: false, message: "Privacy is required" });
+  }
+  if (!properties) {
+    return res.status(400).json({ success: false, message: "Properties is required" });
+  }
 
   try {
-    if (!name) {
-      throw new Error("Name is required");
-    }
-    if (!privacy) {
-      throw new Error("Privacy is required");
-    }
-    if (!properties) {
-      throw new Error("Properties is required");
-    }
-
     const room = {
       name,
       privacy,
       properties,
     };
 
-    dailyAxios.post("/rooms", room).then(async (response) => {
-      res.status(200).send(response.data);
+    dailyAxios.post("/rooms", room).then(async (res) => {
+      data = res.data;
     }).catch((error) => {
       res.status(error.status).send(error.response.data);
     })
-
+    const user = await __getUser(req.userId);
+    if (! await __createRoom(user, data)) {
+      res.status(401).json({ success: false, message: "User already exists" });
+    }
+    res.status(200).send(data);
   } catch (error) {
     res.status(400).json({
       success: false,

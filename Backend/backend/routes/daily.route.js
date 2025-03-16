@@ -1,5 +1,6 @@
 import express from "express";
 import { createRoom } from "../controllers/Daily.controller.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
@@ -84,6 +85,6 @@ const router = express.Router();
   *                   example: a room named hot-room1 already exists
   *                   description: Error information
   */
-router.post("/rooms", createRoom);
+router.post("/rooms", verifyToken, createRoom);
 
 export default router;
