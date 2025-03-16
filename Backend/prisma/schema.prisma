@@ -27,7 +27,7 @@ model User {
 model UserRoom {
   id        String   @id @default(uuid())
   userId    String
-  roomId    String
+  roomName  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

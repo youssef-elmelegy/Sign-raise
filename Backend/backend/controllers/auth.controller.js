@@ -82,7 +82,7 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    generateTokenAndSetCookie(res, user.id);
+    const token = generateTokenAndSetCookie(res, user.id);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -98,6 +98,7 @@ export const login = async (req, res) => {
         ...user,
         password: undefined,
       },
+      token,
     });
   } catch (error) {
     console.log("Error in login ", error);
