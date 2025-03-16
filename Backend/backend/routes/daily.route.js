@@ -1,6 +1,6 @@
 import express from "express";
-import { createRoom } from "../controllers/Daily.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
+import { createRoom, myRooms, getRoomByName } from "../controllers/Daily.controller.js";
 
 const router = express.Router();
 
@@ -86,5 +86,88 @@ const router = express.Router();
   *                   description: Error information
   */
 router.post("/rooms", verifyToken, createRoom);
+
+/**
+ * @swagger
+ * /api/daily/myRooms:
+ *  get:
+ *    summary: Get all rooms created by the user
+ *    tags: [Daily]
+ *    responses:
+ *       200:
+ *         description: Rooms fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "49b86388-b9e2-4c43-bb59-9c496aa32327"
+ *                   userId:
+ *                     type: string
+ *                     example: "860c0d39-8b54-42b8-9b70-479b1bf8f799"
+ *                   roomName:
+ *                     type: string
+ *                     example: "kokiii"
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-03-16T22:01:19.357Z"
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-03-16T22:01:19.357Z"
+ */
+router.get("/myRooms", verifyToken, myRooms);
+
+/**
+ * @swagger
+ * /api/daily/room/{roomName}:
+ *   get:
+ *     summary: Get room by name
+ *     tags: [Daily]
+ *     parameters:
+ *       - in: path
+ *         name: roomName
+ *         required: true
+ *         description: Name of the room
+ *         schema:
+ *           type: string
+ *           example: hot-room
+ *           default: hot-room
+ *           format: string
+ *           minLength: 1
+ *           maxLength: 100
+ *           pattern: "^[a-zA-Z0-9-_]*$"
+ *     responses:
+ *       200:
+ *         description: Room fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "49b86388-b9e2-4c43-bb59-9c496aa32327"
+ *                 userId:
+ *                   type: string
+ *                   example: "860c0d39-8b54-42b8-9b70-479b1bf8f799"
+ *                 roomName:
+ *                   type: string
+ *                   example: "kokiii"
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2025-03-16T22:01:19.357Z"
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: "2025-03-16T22:01:19.357Z"
+ */
+router.get("/room/:roomName", verifyToken, getRoomByName);
 
 export default router;

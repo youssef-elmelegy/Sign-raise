@@ -8,11 +8,10 @@ const __getUser = async (userId) => {
 };
 
 const __createRoom = async (user, room) => {
-  console.log(`the data: ${room}`);
   return prisma.userRoom.create({
     data: {
       userId: user.id,
-      roomId: room.id,
+      roomName: room.name,
     },
   });
 };
@@ -51,4 +50,32 @@ export const createRoom = async (req, res) => {
     }
     return res.status(400).json({ success: false, message: error.message });
   }
+};
+
+export const myRooms = async (req, res) => {
+  try {
+    const user = await __getUser(req.userId);
+    const rooms = await prisma.userRoom.findMany({
+      where: { userId: user.id }
+    });
+
+    const detailedRooms = await Promise.all(
+      rooms.map(async (room) => {
+        const response = await dailyAxios.get(`/rooms/${room.roomName}`);
+        return response.data;
+      })
+    );
+    return res.status(200).json(rooms);
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const getRoomByName = async (req, res) => {
+  const { roomName } = req.params;
+  dailyAxios("/rooms/" + roomName).then( async (response) => {
+    return res.status(response.status).json(response.data);
+  }).catch(error => {
+    return res.status(400).json({ success: false, message: error.message });
+  })
 };
