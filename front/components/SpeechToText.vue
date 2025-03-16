@@ -14,6 +14,13 @@ const languages = ref([
   { code: "ar-SA", name: "Arabic" },
 ]);
 
+const commands = ref([
+  { phrase: "stop recording", action: () => stopRecording() },
+  { phrase: "clear transcript", action: () => clearTranscript() },
+  { phrase: "توقف عن التسجيل", action: () => stopRecording() },
+  { phrase: "امسح النص", action: () => clearTranscript() },
+]);
+
 let recognition = null;
 
 onMounted(() => {
@@ -97,6 +104,16 @@ const handleError = (event) => {
 };
 
 // Controls and Command actions
+const checkForCommands = (text) => {
+  const normalizedText = text.toLowerCase().trim();
+  for (const command of commands.value) {
+    if (normalizedText.includes(command.phrase)) {
+      command.action();
+      return;
+    }
+  }
+};
+
 const stopRecording = () => {
   if (recognition && isRecording.value) {
     recognition.stop();
