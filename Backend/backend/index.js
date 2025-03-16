@@ -1,55 +1,33 @@
 import express from "express";
-import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
+import dailyRoutes from "./routes/daily.route.js";
 import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
+import NodeMediaServer from "node-media-server";
+import { specs, config } from "./config/appConfig.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const CLIENT_URL = process.env.CLIENT_URL;
+// const CLIENT_URL = process.env.CLIENT_URL;
 
-app.use(cors());
+app.use(cors(
+    {
+        origin: '*',
+        credentials: true,
+    }
+));
 
 app.use(express.json());
 app.use(cookieParser());
 
-connectDB();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const specs = swaggerJsdoc({
-definition: {
-  openapi: "3.1.0",
-  info: {
-    title: "Dinamow is the king",
-    version: "1.0.0",
-    description: "this docs have been done by the king of the world",
-    license: {
-      name: "MIT",
-      url: "https://spdx.org/licenses/MIT.html",
-    },
-    contact: {
-      name: "DINAMOW",
-      url: "http://127.0.0.1:3000/",
-      email: "meemoo102039@gmail.com",
-    },
-  },
-  servers: [
-    {
-      url: "http://localhost:3000",
-    },
-  ],
-},
-apis: [path.join(__dirname, "./routes/*.js")],
-});
+connectDB().catch(
+    (error) => console.error("Error connecting to the database: ", error.message)
+)
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
@@ -58,7 +36,11 @@ res.send("Hello World!");
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/daily", dailyRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
 console.log(`Server is running on ${PORT}`);
 });
+
+const nms = new NodeMediaServer(config);
+nms.run();
