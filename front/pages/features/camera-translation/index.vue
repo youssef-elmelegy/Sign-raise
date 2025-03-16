@@ -3,7 +3,7 @@
 </script>
 
 <template>
-
+  <SpeechToText />
 </template>
 
 <style scoped>
