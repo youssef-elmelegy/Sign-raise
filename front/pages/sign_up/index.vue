@@ -38,7 +38,7 @@ const closePopup = () => {
     <inputField name="email" label="Email" />
     <inputField name="password" label="Password" type="password" />
     <TheButton type="submit" :disabled="isSubmitting">
-      Sign Up
+      {{ isSubmitting ? "Creating account..." : "Create Account" }}
     </TheButton>
     <p v-show="showErrors" class="text-red-500 border border-red-200 bg-red-300 text-sm">{{ showErrors }}</p>
     <p class="text-center text-sm">

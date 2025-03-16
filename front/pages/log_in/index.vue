@@ -13,10 +13,8 @@ const {handleSubmit, isSubmitting} = useForm({
 const logIn = handleSubmit(async (data) => {
   try {
     const response = await apiClient.post("api/auth/login", data);
-    sessionStorage.setItem("accessToken", response.data.accessToken);
-    sessionStorage.setItem("refreshToken", response.data.refreshToken);
+    document.cookie  = `token=${response.data.token};`;
     window.location.href = "/";
-    console.log(response);
   } catch (error) {
     if (
       error.response &&

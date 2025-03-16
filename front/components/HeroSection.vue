@@ -11,7 +11,7 @@
                         calls, and more.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <NuxtLink to="/sign-up">
+                        <NuxtLink to="/sign_up">
                             <button
                                 class="bg-purple-heart-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-700 transition shadow-lg cursor-pointer">
                                 Get Started
@@ -21,7 +21,7 @@
                             </TheButton> -->
                         </NuxtLink>
                         <!-- TODO: Replace with actual demo video link -->
-                         <NuxtLink to="/demo">
+                         <NuxtLink to="/">
                         <button
                             class="border-2 border-purple-heart-600 text-purple-heart-600 px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-50 transition cursor-pointer">
                             Watch Demo

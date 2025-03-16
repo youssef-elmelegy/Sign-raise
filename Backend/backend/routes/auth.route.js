@@ -329,8 +329,6 @@ router.post("/resend-verification-email", resendVerificationEmail);
  *   get:
  *     summary: Check if the user is authenticated
  *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: User authenticated
