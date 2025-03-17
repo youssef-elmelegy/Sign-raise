@@ -12,11 +12,11 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
 apiClient.interceptors.response.use(
   (response) => {
-    const { data } = response;
-    if (data.error) {
-      throw new Error(data.error);
+    if (response.data.error) {
+      throw new Error(response.data.error);
     }
     return response;
   },
@@ -25,14 +25,13 @@ apiClient.interceptors.response.use(
 
     // Handle token expiration
     if (error.response.status === 401 && !originalRequest._retry) {
-      // if (!originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = sessionStorage.getItem("refreshToken");
         if (refreshToken) {
           const response = await apiClient.post("/auth/refresh-token", {
-            refreshToken: refreshToken,
+            refreshToken,
           });
 
           if (response.data.accessToken) {

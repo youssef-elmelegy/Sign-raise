@@ -1,12 +1,16 @@
 import prisma from "../db/connectDB.js";
 import bcryptjs from "bcryptjs";
-import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
 } from "../utils/sendEmails.js";
 import crypto from "crypto";
+import {
+  generateTokens,
+  generateAccessToken,
+} from "../utils/generateTokens.js";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   const { email, password, name } = req.body;
@@ -66,23 +70,17 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+
   try {
-    const user = await prisma.user.findUnique({
-      where: { email }, // Use 'where' clause with the email field
-    });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-    const isPasswordValid = await bcryptjs.compare(password, user.password);
-    if (!isPasswordValid) {
+    const user = await prisma.User.findUnique({ where: { email } });
+
+    if (!user || !(await bcryptjs.compare(password, user.password))) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = generateTokenAndSetCookie(res, user.id);
+    const { accessToken, refreshToken } = generateTokens(user.id);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -98,11 +96,10 @@ export const login = async (req, res) => {
         ...user,
         password: undefined,
       },
-      token,
+      token: { accessToken, refreshToken },
     });
   } catch (error) {
-    console.log("Error in login ", error);
-    res.status(400).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -146,6 +143,42 @@ export const forgotPassword = async (req, res) => {
   } catch (error) {
     console.log("Error in forgotPassword ", error);
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    if (!decoded || !decoded.id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid token payload" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id }, // Use `id` instead of `userId`
+    });
+
+    if (!user) {
+      return res
+        .status(403)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const newAccessToken = generateAccessToken(user.id);
+    return res.json({ success: true, accessToken: newAccessToken });
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return res
+      .status(401)
+      .json({ success: false, message: error.message || "Unauthorized" });
   }
 };
 
