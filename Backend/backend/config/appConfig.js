@@ -9,9 +9,9 @@ export const specs = swaggerJsdoc({
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "Dinamow is the king",
+      title: "Sign-Raise",
       version: "1.0.0",
-      description: "this docs have been done by the king of the world",
+      description: "Sign-Raise is a platform for secure video conferencing and live translation.",
       license: {
         name: "MIT",
         url: "https://spdx.org/licenses/MIT.html",
@@ -29,15 +29,16 @@ export const specs = swaggerJsdoc({
     ],
     components: {
       securitySchemes: {
-        cookieAuth: {
-          type: "apiKey",
-          in: "cookie",
-          name: "token",
-        },
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          in: "header",
+        }
       },
     },
     // Apply cookie-based authentication globally to all endpoints:
-    security: [{ cookieAuth: [] }],
+    security: [{ BearerAuth: [] }],
   },
   apis: [path.join(__dirname, "./routes/*.js")],
 });
@@ -68,4 +69,3 @@ export const config = {
     ]
   }
 };
-
