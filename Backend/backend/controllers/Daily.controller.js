@@ -79,3 +79,11 @@ export const getRoomByName = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   })
 };
+
+export const createRoomToken = async (req, res) => {
+  dailyAxios.post(`/meeting-tokens`, {properties: req.body}).then( async (response) => {
+    return res.status(response.status).json(response.data);
+  }).catch(error => {
+    return res.status(400).json({ success: false, message: error.message });
+  })
+}
