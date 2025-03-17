@@ -9,10 +9,18 @@ import {
   resetPassword,
   changePassword,
   chechAuth,
+  refreshToken,
 } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints
+ */
 
 /**
  * @swagger
@@ -26,49 +34,24 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
  *                 example: John Doe
- *               password:
- *                 type: string
  *               email:
  *                 type: string
  *                 format: email
+ *               password:
+ *                 type: string
  *     responses:
  *       201:
  *         description: User created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     lastLogin:
- *                       type: string
- *                       format: date-time
- *                     isVerified:
- *                       type: boolean
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
  *       400:
- *         description: Bad request – missing fields or user already exists
+ *         description: Bad request (e.g., missing fields or user already exists)
  *       500:
  *         description: Server error
  */
@@ -86,6 +69,9 @@ router.post("/signup", signup);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
@@ -96,33 +82,38 @@ router.post("/signup", signup);
  *     responses:
  *       200:
  *         description: Logged in successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     lastLogin:
- *                       type: string
- *                       format: date-time
- *                     isVerified:
- *                       type: boolean
  *       400:
  *         description: Invalid credentials or bad request
  */
 router.post("/login", login);
+
+/**
+ * @swagger
+ * /api/auth/refresh-token:
+ *   post:
+ *     summary: Refresh authentication token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: "your-refresh-token"
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *       400:
+ *         description: Invalid or missing refresh token
+ *       401:
+ *         description: Unauthorized or expired refresh token
+ */
+router.post("/refresh-token", refreshToken);
 
 /**
  * @swagger
@@ -133,15 +124,6 @@ router.post("/login", login);
  *     responses:
  *       200:
  *         description: Logged out successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
  */
 router.post("/logout", logout);
 
@@ -157,6 +139,8 @@ router.post("/logout", logout);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
  *             properties:
  *               email:
  *                 type: string
@@ -165,15 +149,6 @@ router.post("/logout", logout);
  *     responses:
  *       200:
  *         description: Password reset link sent successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
  *       400:
  *         description: User not found or bad request
  */
@@ -198,23 +173,16 @@ router.post("/forgot-password", forgotPassword);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - password
  *             properties:
  *               password:
  *                 type: string
  *     responses:
  *       200:
  *         description: Password reset successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
  *       400:
- *         description: Invalid or expired token, or bad request
+ *         description: Invalid or expired token
  */
 router.post("/reset-password/:token", resetPassword);
 
@@ -232,6 +200,9 @@ router.post("/reset-password/:token", resetPassword);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
  *             properties:
  *               oldPassword:
  *                 type: string
@@ -240,15 +211,6 @@ router.post("/reset-password/:token", resetPassword);
  *     responses:
  *       200:
  *         description: Password changed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
  *       400:
  *         description: Invalid credentials or bad request
  */
@@ -256,95 +218,15 @@ router.post("/change-password", verifyToken, changePassword);
 
 /**
  * @swagger
- * /api/auth/verify-email:
- *   post:
- *     summary: Verify user's email address
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               code:
- *                 type: string
- *                 example: "748330"
- *     responses:
- *       200:
- *         description: Email verified successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 user:
- *                   type: object
- *       400:
- *         description: Invalid or expired verification code
- */
-router.post("/verify-email", verifyEmail);
-
-/**
- * @swagger
- * /api/auth/resend-verification-email:
- *   post:
- *     summary: Resend the verification email
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: user@example.com
- *     responses:
- *       200:
- *         description: Verification email sent successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       400:
- *         description: User not found, already verified, or bad request
- */
-router.post("/resend-verification-email", resendVerificationEmail);
-
-/**
- * @swagger
  * /api/auth/check-auth:
  *   get:
  *     summary: Check if the user is authenticated
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User authenticated
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 user:
- *                   type: object
- *       400:
- *         description: Authentication error
+ *         description: User is authenticated
  */
 router.get("/check-auth", verifyToken, chechAuth);
 
