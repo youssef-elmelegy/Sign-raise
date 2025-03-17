@@ -21,7 +21,8 @@ const normalizeOrigin = (origin) => {
 // Normalize the allowed origins from environment variables
 const allowedOrigins = [
   normalizeOrigin(process.env.CLIENT_URL),
-  normalizeOrigin(process.env.CLIENT_URL2)
+  normalizeOrigin(process.env.CLIENT_URL2),
+  normalizeOrigin(process.env.CLIENT_URL3),
 ];
 
 app.use(
