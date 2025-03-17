@@ -29,15 +29,16 @@ export const specs = swaggerJsdoc({
     ],
     components: {
       securitySchemes: {
-        cookieAuth: {
-          type: "apiKey",
-          in: "cookie",
-          name: "token",
-        },
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          in: "header",
+        }
       },
     },
     // Apply cookie-based authentication globally to all endpoints:
-    security: [{ cookieAuth: [] }],
+    security: [{ BearerAuth: [] }],
   },
   apis: [path.join(__dirname, "./routes/*.js")],
 });

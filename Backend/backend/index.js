@@ -14,16 +14,28 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = [process.env.CLIENT_URL, process.env.CLIENT_URL2];
+const normalizeOrigin = (origin) => {
+  return origin && origin.endsWith('/') ? origin.slice(0, -1) : origin;
+};
 
+// Normalize the allowed origins from environment variables
+const allowedOrigins = [
+  normalizeOrigin(process.env.CLIENT_URL),
+  normalizeOrigin(process.env.CLIENT_URL2)
+];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Normalize the incoming origin and check against the allowed list
+      if (allowedOrigins.includes(normalizeOrigin(origin))) {
+        return callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        console.log("Rejected origin: " + origin);
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
