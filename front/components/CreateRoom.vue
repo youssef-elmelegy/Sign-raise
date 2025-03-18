@@ -6,25 +6,25 @@ import DailyIframe from '@daily-co/daily-js';
 const privacy = ref('private');
 const name = ref('');
 const roomUrl = ref('');
+const errorMessage = ref('');
+const isLoading = ref(false);
+
 const dailyFrameManager = {
   currentFrame: null,
 
   destroyExistingFrames() {
-    const existingFrames = document.querySelectorAll(
-      'iframe[data-daily-frame]',
-    );
-    existingFrames.forEach((frame) => {
+    if (this.currentFrame) {
       try {
-        const frameInstance = DailyIframe.wrap(frame);
-        frameInstance.destroy();
+        this.currentFrame.destroy();
       } catch (e) {
-        console.log('Error destroying frame:', e);
-        if (frame.parentNode) {
-          frame.parentNode.removeChild(frame);
-        }
+        console.error('Error destroying frame:', e);
       }
+      this.currentFrame = null;
+    }
+
+    document.querySelectorAll('iframe[data-daily-frame]').forEach((frame) => {
+      frame.parentNode?.removeChild(frame);
     });
-    this.currentFrame = null;
   },
 
   createFrame(options) {
@@ -40,8 +40,61 @@ const dailyFrameManager = {
   },
 };
 
+// Setup event listeners that properly handle cleanup
+const setupCallEvents = (call) => {
+  dailyFrameManager.currentFrame = call;
+  // Setup all relevant event listeners for proper cleanup
+  const eventsThatCleanup = [
+    'left-meeting',
+    'room:left',
+    'call-ended',
+    'participant-left',
+  ];
+
+  eventsThatCleanup.forEach((eventName) => {
+    call.on(eventName, () => {
+      console.log(`${eventName} event triggered`);
+      dailyFrameManager.destroyExistingFrames();
+    });
+  });
+
+  // Handle errors separately to also update the error message
+  call.on('error', (error) => {
+    console.error('Daily.co error:', error);
+    errorMessage.value = error.errorMsg || 'Call error occurred';
+    dailyFrameManager.destroyExistingFrames();
+  });
+
+  return call;
+};
+
 const createRoom = async () => {
   try {
+    errorMessage.value = '';
+    isLoading.value = true;
+
+    if (!name.value.trim()) {
+      errorMessage.value = 'Please enter a room name';
+      isLoading.value = false;
+      return;
+    }
+
+    // Check if room already exists
+    try {
+      const checkResponse = await apiClient.get(
+        `api/daily/room/${name.value.trim()}`,
+      );
+      if (checkResponse.status === 200) {
+        errorMessage.value = `Room "${name.value.trim()}" already exists. Please choose a unique name.`;
+        isLoading.value = false;
+        return;
+      }
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        console.error('Error checking room existence:', error);
+      }
+    }
+
     const response = await apiClient.post('api/daily/rooms', {
       name: name.value.trim(),
       privacy: privacy.value,
@@ -53,9 +106,9 @@ const createRoom = async () => {
         enable_screenshare: true,
       },
     });
-    console.log(response);
-    console.log(response.data);
+
     roomUrl.value = response.data.url;
+
     if (privacy.value === 'private') {
       await getToken(name.value.trim());
     } else {
@@ -63,6 +116,20 @@ const createRoom = async () => {
     }
   } catch (error) {
     console.error('Error creating room:', error);
+
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      errorMessage.value = 'Unauthorized. Please log in to create a room.';
+    } else if (error.response?.status === 409) {
+      errorMessage.value = `Room "${name.value.trim()}" already exists. Please choose a Unique name.`;
+    } else if (error.response?.data?.message) {
+      errorMessage.value = error.response.data.message;
+    } else {
+      errorMessage.value = error.message || 'Failed to create room';
+    }
+
+    dailyFrameManager.destroyExistingFrames();
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -73,6 +140,14 @@ const getToken = async (roomName) => {
     await createRoomFrame(roomUrl.value, token);
   } catch (err) {
     console.error('Error getting token:', err);
+
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      errorMessage.value = 'Please log-in';
+    } else {
+      errorMessage.value =
+        err.response?.data?.message || 'Failed to get access token';
+    }
+    dailyFrameManager.destroyExistingFrames();
   }
 };
 
@@ -86,6 +161,7 @@ const createRoomFrame = async (roomUrl, token = null) => {
         height: '450px',
         right: '1em',
         bottom: '1em',
+        zIndex: 9999,
       },
       dailyConfig: {
         micAudioMode: 'music',
@@ -94,34 +170,21 @@ const createRoomFrame = async (roomUrl, token = null) => {
       showFullscreenButton: true,
     });
 
-    call.on('error', (error) => {
-      console.error('Daily.co error:', error);
-      errorMessage.value = error.errorMsg || 'Call error occurred';
-    });
-
-    call.on('left-meeting', () => {
-      console.log('Left meeting');
-      callActive.value = false;
-      dailyFrameManager.destroyExistingFrames();
-    });
-
-    call.on('room:left', () => {
-      console.log('Left room');
-      callActive.value = false;
-      dailyFrameManager.destroyExistingFrames();
-    });
-
+    setupCallEvents(call);
+    // Join the room
     if (token) {
-      call.join({ url: roomUrl, token });
+      await call.join({ url: roomUrl, token });
     } else {
-      call.join({ url: roomUrl });
+      await call.join({ url: roomUrl });
     }
   } catch (e) {
     console.error('Error in createRoomFrame:', e);
+    errorMessage.value = e.message || 'Failed to create call frame';
+    dailyFrameManager.destroyExistingFrames();
   }
 };
 
-// Lifecycle hooks to manage frames
+// Lifecycle hooks for cleanup
 onMounted(() => {
   dailyFrameManager.destroyExistingFrames();
 });
@@ -148,7 +211,8 @@ onBeforeUnmount(() => {
               v-model="name"
               id="name"
               label="Room Name"
-              placeholder="Enter room name"
+              placeholder="Enter an unique name"
+              @keyup.enter="createRoom"
             />
           </div>
           <div class="flex flex-col items-center">
@@ -163,7 +227,13 @@ onBeforeUnmount(() => {
             </select>
           </div>
         </div>
-        <TheButton @click="createRoom">Start Video Call</TheButton>
+        <TheButton @click="createRoom" :disabled="isLoading">
+          {{ isLoading ? 'Creating...' : 'Start Video Call' }}
+        </TheButton>
+      </div>
+
+      <div v-if="errorMessage" class="mt-4 text-center text-red-500">
+        {{ errorMessage }}
       </div>
     </div>
   </main>
