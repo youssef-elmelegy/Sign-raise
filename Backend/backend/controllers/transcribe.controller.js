@@ -1,4 +1,3 @@
-import fs from "fs";
 import { transcribeLocalAudio } from "../utils/transcribeAudioFiles.js";
 
 const allowedTypes = [
@@ -18,18 +17,14 @@ export const transcribeFile = async (req, res) => {
     }
 
     if (req.file.size > 10 * 1024 * 1024) {
-      fs.unlinkSync(req.file.path);
       return res.status(413).json({ error: "File size exceeds 10MB limit" });
     }
 
     if (!allowedTypes.includes(req.file.mimetype)) {
-      fs.unlinkSync(req.file.path);
       return res.status(415).json({ error: "Unsupported file type" });
     }
 
-    const result = await transcribeLocalAudio(req.file.path);
-
-    fs.unlinkSync(req.file.path);
+    const result = await transcribeLocalAudio(req.file.buffer);
 
     res.status(200).send(result);
   } catch (error) {

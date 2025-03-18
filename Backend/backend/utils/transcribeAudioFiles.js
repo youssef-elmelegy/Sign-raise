@@ -1,4 +1,3 @@
-import fs from "fs";
 import { createClient } from "@deepgram/sdk";
 import dotenv from "dotenv";
 dotenv.config();
@@ -14,12 +13,11 @@ const transcriptionConfig = {
 };
 
 /**
- * Transcribes a local audio file
- * @param {string} filePath - Path to local audio file
+ * Transcribes an audio buffer
+ * @param {Buffer} audioBuffer - Audio file buffer
  */
-export const transcribeLocalAudio = async (filePath) => {
+export const transcribeLocalAudio = async (audioBuffer) => {
   try {
-    const audioBuffer = fs.readFileSync(filePath);
     const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
       audioBuffer,
       transcriptionConfig
@@ -29,7 +27,7 @@ export const transcribeLocalAudio = async (filePath) => {
 
     return processTranscriptionResult(result);
   } catch (error) {
-    console.error("Error transcribing local audio:", error);
+    console.error("Error transcribing audio:", error);
     throw error;
   }
 };
