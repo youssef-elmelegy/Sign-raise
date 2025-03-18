@@ -10,13 +10,15 @@ const dailyFrameManager = {
   currentFrame: null,
 
   destroyExistingFrames() {
-    const existingFrames = document.querySelectorAll('iframe[data-daily-frame]');
-    existingFrames.forEach(frame => {
+    const existingFrames = document.querySelectorAll(
+      'iframe[data-daily-frame]',
+    );
+    existingFrames.forEach((frame) => {
       try {
         const frameInstance = DailyIframe.wrap(frame);
         frameInstance.destroy();
       } catch (e) {
-        console.log("Error destroying frame:", e);
+        console.log('Error destroying frame:', e);
         if (frame.parentNode) {
           frame.parentNode.removeChild(frame);
         }
@@ -28,14 +30,14 @@ const dailyFrameManager = {
   createFrame(options) {
     this.destroyExistingFrames();
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         const frame = DailyIframe.createFrame(options);
         this.currentFrame = frame;
         resolve(frame);
       }, 100);
     });
-  }
+  },
 };
 
 const createRoom = async () => {
@@ -49,7 +51,7 @@ const createRoom = async () => {
         start_audio_off: false,
         start_video_off: false,
         enable_screenshare: true,
-      }
+      },
     });
     console.log(response);
     console.log(response.data);
@@ -60,7 +62,7 @@ const createRoom = async () => {
       await createRoomFrame(roomUrl.value);
     }
   } catch (error) {
-    console.error("Error creating room:", error);
+    console.error('Error creating room:', error);
   }
 };
 
@@ -70,13 +72,12 @@ const getToken = async (roomName) => {
     const token = response.data.token;
     await createRoomFrame(roomUrl.value, token);
   } catch (err) {
-    console.error("Error getting token:", err);
+    console.error('Error getting token:', err);
   }
 };
 
 const createRoomFrame = async (roomUrl, token = null) => {
   try {
-
     const call = await dailyFrameManager.createFrame({
       iframeStyle: {
         position: 'fixed',
@@ -93,6 +94,22 @@ const createRoomFrame = async (roomUrl, token = null) => {
       showFullscreenButton: true,
     });
 
+    call.on('error', (error) => {
+      console.error('Daily.co error:', error);
+      errorMessage.value = error.errorMsg || 'Call error occurred';
+    });
+
+    call.on('left-meeting', () => {
+      console.log('Left meeting');
+      callActive.value = false;
+      dailyFrameManager.destroyExistingFrames();
+    });
+
+    call.on('room:left', () => {
+      console.log('Left room');
+      callActive.value = false;
+      dailyFrameManager.destroyExistingFrames();
+    });
 
     if (token) {
       call.join({ url: roomUrl, token });
@@ -100,7 +117,7 @@ const createRoomFrame = async (roomUrl, token = null) => {
       call.join({ url: roomUrl });
     }
   } catch (e) {
-    console.error("Error in createRoomFrame:", e);
+    console.error('Error in createRoomFrame:', e);
   }
 };
 
@@ -117,17 +134,30 @@ onBeforeUnmount(() => {
 <template>
   <main class="flex-grow">
     <div class="max-w-lg mx-auto py-12">
-      <h1 class="text-3xl font-bold text-center">Video Call with Live Translation</h1>
-      <p class="text-center text-gray-600 mt-2">Start a video call with live translation</p>
+      <h1 class="text-3xl font-bold text-center">
+        Video Call with Live Translation
+      </h1>
+      <p class="text-center text-gray-600 mt-2">
+        Start a video call with live translation
+      </p>
 
       <div class="flex flex-col justify-center my-4">
         <div class="flex mb-4 justify-center items-center space-x-4">
           <div>
-            <InputField v-model="name" id="name" label="Room Name" placeholder="Enter room name" />
+            <InputField
+              v-model="name"
+              id="name"
+              label="Room Name"
+              placeholder="Enter room name"
+            />
           </div>
           <div class="flex flex-col items-center">
             <label for="privacy" class="text-gray-600">Room privacy</label>
-            <select v-model="privacy" id="privacy" class="border border-gray-300 rounded-md px-4 py-1">
+            <select
+              v-model="privacy"
+              id="privacy"
+              class="border border-gray-300 rounded-md px-4 py-1"
+            >
               <option value="private">Private</option>
               <option value="public">Public</option>
             </select>

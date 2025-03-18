@@ -13,26 +13,34 @@ const dailyFrameManager = {
   currentFrame: null as DailyIframe | null,
 
   destroyExistingFrames() {
-    const existingFrames = document.querySelectorAll('iframe[data-daily-frame]');
-    existingFrames.forEach(frame => {
+    if (this.currentFrame) {
       try {
-        const frameInstance = DailyIframe.wrap(frame);
-        frameInstance.destroy();
+        this.currentFrame.destroy();
       } catch (e) {
-        console.error("Error destroying frame:", e);
+        console.error('Error destroying current frame:', e);
+      }
+      this.currentFrame = null;
+    }
+
+    const existingFrames = document.querySelectorAll(
+      'iframe[data-daily-frame]',
+    );
+    existingFrames.forEach((frame) => {
+      try {
         frame.parentNode?.removeChild(frame);
+      } catch (e) {
+        console.error('Error removing iframe:', e);
       }
     });
-    this.currentFrame = null;
   },
 
   async createFrame(options: DailyIframe.Properties) {
     this.destroyExistingFrames();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     const frame = DailyIframe.createFrame(options);
     this.currentFrame = frame;
     return frame;
-  }
+  },
 };
 
 const joinRoom = async () => {
@@ -52,7 +60,7 @@ const joinRoom = async () => {
     const token = res.data.token;
     await createRoomFrame(roomData.url, token);
   } catch (error: any) {
-    console.error("Error joining room:", error);
+    console.error('Error joining room:', error);
     errorMessage.value = error.response?.data?.message || error.message;
   }
 };
@@ -76,7 +84,7 @@ const createRoomFrame = async (url: string, token?: string) => {
     });
 
     call.on('error', (error) => {
-      console.error("Daily.co error:", error);
+      console.error('Daily.co error:', error);
       errorMessage.value = error.errorMsg;
     });
 
@@ -89,9 +97,14 @@ const createRoomFrame = async (url: string, token?: string) => {
       dailyFrameManager.destroyExistingFrames();
     });
 
+    call.on('left-meeting', () => {
+      console.log('Left meeting event triggered');
+      dailyFrameManager.destroyExistingFrames();
+    });
+
     await call.join({ url, token });
   } catch (error: any) {
-    console.error("Error creating room frame:", error);
+    console.error('Error creating room frame:', error);
     errorMessage.value = error.message;
   }
 };
@@ -103,11 +116,11 @@ const createRoomFrame = async (url: string, token?: string) => {
       <h1 class="text-3xl font-bold text-center">Join Room</h1>
       <div class="space-y-4 mt-6">
         <InputField
-            v-model="name"
-            id="name"
-            label="Room Name"
-            placeholder="Enter room name"
-            @keyup.enter="joinRoom"
+          v-model="name"
+          id="name"
+          label="Room Name"
+          placeholder="Enter room name"
+          @keyup.enter="joinRoom"
         />
         <TheButton @click="joinRoom" class="w-full">Join Room</TheButton>
       </div>
