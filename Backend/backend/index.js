@@ -5,6 +5,7 @@ import cors from "cors";
 import { connectDB } from "./db/connectDB.js";
 import authRoutes from "./routes/auth.route.js";
 import dailyRoutes from "./routes/daily.route.js";
+import transcribeRoutes from "./routes/transcribe.route.js";
 import cookieParser from "cookie-parser";
 import NodeMediaServer from "node-media-server";
 import { specs, config } from "./config/appConfig.js";
@@ -15,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const normalizeOrigin = (origin) => {
-  return origin && origin.endsWith('/') ? origin.slice(0, -1) : origin;
+  return origin && origin.endsWith("/") ? origin.slice(0, -1) : origin;
 };
 
 // Normalize the allowed origins from environment variables
@@ -57,11 +58,14 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send(`Sign raise API:
+    You can access Docs in ${process.env.CLIENT_URL2}/api-docs
+    `);
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/daily", dailyRoutes);
+app.use("/api/trans", transcribeRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on ${PORT}`);
