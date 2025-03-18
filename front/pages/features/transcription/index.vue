@@ -44,10 +44,10 @@
 
 <script setup>
 import { ref } from 'vue';
-import TranscriptionHero from '@/components/TranscriptionHero.vue';
-import TranscriptionInfo from '@/components/TranscriptionInfo.vue';
-import FileUploader from '@/components/FileUploader.vue';
-import TranscriptionResults from '@/components/TranscriptionResults.vue';
+import TranscriptionHero from '~/components/transcirption/TranscriptionHero.vue';
+import TranscriptionInfo from '~/components/transcirption/TranscriptionInfo.vue';
+import FileUploader from '~/components/transcirption/FileUploader.vue';
+import TranscriptionResults from '~/components/transcirption/TranscriptionResults.vue';
 
 // State variables
 const selectedFile = ref(null);
