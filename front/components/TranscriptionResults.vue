@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold">Transcription Results</h3>
             <button @click="$emit('download')"
-                class="text-purple-heart-600 flex items-center hover:text-purple-heart-700 transition">
+                class="text-purple-heart-600 flex items-center hover:text-purple-heart-800 transition cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="lucide lucide-download mr-1">
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Word Analysis -->
-        <div v-if="transcriptionResult.words && transcriptionResult.words.length">
+        <!-- <div v-if="transcriptionResult.words && transcriptionResult.words.length">
             <h4 class="font-medium mb-3">Word-by-Word Analysis</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div v-for="(word, index) in transcriptionResult.words" :key="index"
@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 

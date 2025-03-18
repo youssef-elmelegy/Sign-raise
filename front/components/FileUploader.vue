@@ -14,16 +14,17 @@
                 {{ selectedFile ? selectedFile.name : 'Drag and drop your audio or video file here' }}
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <label for="fileInput" class="cursor-pointer">
-                    <TheButton>
-                        Browse Files
-                    </TheButton>
-                    <input type="file" id="fileInput" ref="fileInput" accept="audio/*,video/*" class="hidden"
-                        @change="handleFileSelect" />
-                </label>
-                <TheButton v-if="selectedFile && !isTranscribing" @click="$emit('transcribe')">
+                <button @click="triggerFileInput"
+                    class="bg-purple-heart-600 hover:bg-purple-heart-700 transition-colors justify-center items-center flex gap-2 w-full text-white px-7 cursor-pointer py-2 rounded-full">
+                    Browse Files
+                </button>
+                <input type="file" id="fileInput" ref="fileInput" accept="audio/*,video/*" class="hidden"
+                    @change="handleFileSelect" />
+
+                <button v-if="selectedFile && !isTranscribing" @click="$emit('transcribe')"
+                    class="bg-purple-heart-600 hover:bg-purple-heart-700 transition-colors justify-center items-center flex gap-2 w-full text-white px-7 cursor-pointer py-2 rounded-full">
                     Transcribe Now
-                </TheButton>
+                </button>
             </div>
         </div>
 
@@ -59,10 +60,16 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['file-selected', 'transcribe']);
+const emit = defineEmits(['file-selected', 'transcribe', 'error']);
 const fileInput = ref(null);
 const isDragging = ref(false);
 
+// Added: Function to trigger file input click
+const triggerFileInput = () => {
+    fileInput.value.click();
+};
+
+// Handle file selection from input
 const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -70,6 +77,7 @@ const handleFileSelect = (event) => {
     }
 };
 
+// Handle file drop
 const handleFileDrop = (event) => {
     isDragging.value = false;
     const file = event.dataTransfer.files[0];
@@ -77,6 +85,7 @@ const handleFileDrop = (event) => {
         emit('file-selected', file);
     } else {
         emit('file-selected', null);
+        // Signal an error to parent
         emit('error', "Please upload an audio or video file");
     }
 };
