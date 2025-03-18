@@ -58,10 +58,14 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send(`Sign raise API:
-    You can access Docs in ${process.env.CLIENT_URL2}/api-docs
-    `);
+  const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
+  
+  res.send(`
+    <h1>Sign Raise API</h1>
+    <p>You can access the <a href="${backendUrl}/api-docs" target="_blank">API Docs here</a>.</p>
+  `);
 });
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/daily", dailyRoutes);
