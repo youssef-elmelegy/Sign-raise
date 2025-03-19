@@ -47,7 +47,7 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         sessionStorage.clear();
-        window.location.href = "/join_us";
+        window.location.href = "/log_in";
         return Promise.reject(refreshError);
       }
     }

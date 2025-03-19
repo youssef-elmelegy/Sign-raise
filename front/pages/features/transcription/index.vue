@@ -13,7 +13,7 @@
 
             <!-- Right Column - Upload & Results -->
             <div class="lg:w-3/5 w-full">
-              <!-- API Status Warning (if needed) -->
+              <!-- API Status Warning -->
               <div v-if="showApiWarning"
                 class="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded-xl mb-4">
                 <div class="flex items-center">
@@ -77,6 +77,10 @@ import FileUploader from '@/components/transcription/FileUploader.vue';
 import TranscriptionResults from '@/components/transcription/TranscriptionResults.vue';
 import apiClient from "~/utils/apiClient";
 
+// Constants
+const MAX_FILE_SIZE_MB = 10;
+const PRIMARY_ENDPOINT = '/api/trans/transcribe';
+
 // State variables
 const selectedFile = ref(null);
 const isTranscribing = ref(false);
@@ -86,132 +90,79 @@ const error = ref(null);
 const apiErrorCount = ref(0);
 const showTroubleshootingTips = ref(false);
 
-// Computed property to determine if we should show API warning
+// Computed property
 const showApiWarning = computed(() => apiErrorCount.value > 0);
 
-// API endpoints - Try both relative and absolute paths
-const API_ENDPOINTS = [
-  '/api/trans/transcribe',                        // Primary endpoint (relative)
-  'https://api.yourdomain.com/api/trans/transcribe', // Fallback endpoint (replace with actual domain)
-  '/api/transcribe'                               // Another possible endpoint
-];
-
-// Handle file selection from child component
+// Handle file selection
 const handleFileSelected = (file) => {
   selectedFile.value = file;
   error.value = null;
   showTroubleshootingTips.value = false;
 };
 
-// Handle errors from child components
+// Handle errors
 const handleError = (errorMessage) => {
   error.value = errorMessage;
 };
 
-// Transcribe the selected file
+// Transcribe file
 const transcribeFile = async () => {
   if (!selectedFile.value) {
     error.value = "Please select an audio or video file";
     return;
   }
 
-  // Check file size and provide clear feedback
+  // Check file size
   const fileSizeMB = selectedFile.value.size / (1024 * 1024);
-  const MAX_FILE_SIZE_MB = 10; // 10MB
-
   if (fileSizeMB > MAX_FILE_SIZE_MB) {
     error.value = `File size (${fileSizeMB.toFixed(2)}MB) exceeds the maximum limit of ${MAX_FILE_SIZE_MB}MB`;
     return;
   }
 
+  // Reset states
   error.value = null;
   showTroubleshootingTips.value = false;
   isTranscribing.value = true;
   progress.value = 10;
 
+  // Prepare form data
   const formData = new FormData();
   formData.append("audio", selectedFile.value);
 
-  // Add diagnostic information
-  console.log(`Uploading file: ${selectedFile.value.name}, Size: ${fileSizeMB.toFixed(2)}MB, Type: ${selectedFile.value.type}`);
-
-  // Define progressInterval outside the try block so it's accessible in the catch and finally blocks
-  let progressInterval;
+  // Progress simulation interval
+  let progressInterval = setInterval(() => {
+    if (progress.value < 90) {
+      progress.value += 5;
+    }
+  }, 500);
 
   try {
-    // Simulate progress for better UX
-    progressInterval = setInterval(() => {
-      if (progress.value < 90) {
-        progress.value += 5;
-      }
-    }, 500);
-
-    // Add more detailed request configuration
+    // Configure request
     const requestConfig = {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      timeout: 180000, // Increase timeout to 3 minutes
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 180000, // 3 minutes
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         progress.value = Math.min(90, percentCompleted);
-        console.log(`Upload progress: ${percentCompleted}%`);
       }
     };
 
-    // Try each endpoint in sequence until one works
-    let response = null;
-    let lastError = null;
-    let successfulEndpoint = null;
+    // Send request
+    const response = await apiClient.post(PRIMARY_ENDPOINT, formData, requestConfig);
 
-    for (const endpoint of API_ENDPOINTS) {
-      try {
-        console.log(`Trying API endpoint: ${endpoint}`);
-        response = await apiClient.post(endpoint, formData, requestConfig);
-        successfulEndpoint = endpoint;
-        break; // If successful, exit the loop
-      } catch (endpointError) {
-        console.warn(`Endpoint ${endpoint} failed:`, endpointError);
-        lastError = endpointError;
-        // Continue to the next endpoint
-      }
-    }
-
-    // If all endpoints failed, throw the last error
-    if (!response) {
-      throw lastError;
-    }
-
-    // If we got here, one of the endpoints worked
-    console.log(`Successfully used endpoint: ${successfulEndpoint}`);
-    clearInterval(progressInterval);
-    progressInterval = null; // Clear the reference
+    // Process response
     progress.value = 100;
-
-    const data = response.data;
-    console.log("Received data:", data);
-
     transcriptionResult.value = {
-      transcript: data.transcript,
-      words: data.words
+      transcript: response.data.transcript,
+      words: response.data.words
     };
 
     // Reset API error count on success
     apiErrorCount.value = 0;
 
   } catch (err) {
-    console.error("Transcription error:", err);
-
-    // Clear the interval if it exists
-    if (progressInterval) {
-      clearInterval(progressInterval);
-      progressInterval = null;
-    }
-
-    // Increment API error count
+    // Handle errors
     apiErrorCount.value++;
-
-    // Provide more detailed error information and troubleshooting steps
     let errorMsg = "An error occurred during transcription";
 
     if (err.code === 'ERR_NETWORK') {
@@ -221,7 +172,7 @@ const transcribeFile = async () => {
       errorMsg = "The request timed out. The file might be too large or the server is busy.";
       showTroubleshootingTips.value = true;
     } else if (err.response) {
-      // Server responded with an error status
+      // Server responded with an error
       errorMsg = err.response.data?.error || `Server error: ${err.response.status}`;
 
       if (err.response.status === 413) {
@@ -235,51 +186,15 @@ const transcribeFile = async () => {
         showTroubleshootingTips.value = true;
       }
     } else if (err.request) {
-      // Request was made but no response received
       errorMsg = "No response received from the transcription service.";
-      showTroubleshootingTips.value = true;
-    } else {
-      // Something else happened
-      errorMsg = err.message || "Unknown error occurred";
       showTroubleshootingTips.value = true;
     }
 
     error.value = errorMsg;
-
-    console.log(`Detailed error: ${JSON.stringify({
-      code: err.code,
-      message: err.message,
-      displayMessage: err.displayMessage,
-      status: err.response?.status,
-      statusText: err.response?.statusText
-    }, null, 2)}`);
   } finally {
-    // Make sure to clear the interval if it still exists
-    if (progressInterval) {
-      clearInterval(progressInterval);
-    }
+    clearInterval(progressInterval);
     isTranscribing.value = false;
   }
-};
-
-// Download transcript as a text file
-const downloadTranscriptAsText = () => {
-  if (!transcriptionResult.value || !transcriptionResult.value.transcript) return;
-
-  const transcript = transcriptionResult.value.transcript;
-  const blob = new Blob([transcript], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'transcript.txt';
-  document.body.appendChild(a);
-  a.click();
-
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 100);
 };
 
 // Format time for SRT (00:00:00,000)
@@ -289,23 +204,29 @@ const formatSrtTime = (seconds) => {
   const secs = Math.floor(seconds % 60);
   const milliseconds = Math.floor((seconds % 1) * 1000);
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
+};
+
+// Download transcript as text
+const downloadTranscriptAsText = () => {
+  if (!transcriptionResult.value?.transcript) return;
+
+  downloadFile(transcriptionResult.value.transcript, 'transcript.txt', 'text/plain');
 };
 
 // Download transcript as SRT subtitles
 const downloadTranscriptAsSubtitle = () => {
-  if (!transcriptionResult.value || !transcriptionResult.value.words || !transcriptionResult.value.words.length) {
+  if (!transcriptionResult.value?.words?.length) {
     error.value = "Word data not available for subtitle generation";
     return;
   }
 
   const words = transcriptionResult.value.words;
-
-  // Group words into subtitle chunks (approximately 5-10 words per subtitle)
   const subtitles = [];
   let currentSubtitle = { words: [], start: 0, end: 0 };
   let wordCount = 0;
 
+  // Group words into subtitle chunks
   for (const word of words) {
     if (wordCount === 0) {
       currentSubtitle.start = word.start;
@@ -315,7 +236,6 @@ const downloadTranscriptAsSubtitle = () => {
     currentSubtitle.end = word.end;
     wordCount++;
 
-    // Create a new subtitle every ~7 words or at punctuation
     if (wordCount >= 7 || word.text.match(/[.!?]$/)) {
       subtitles.push({
         start: currentSubtitle.start,
@@ -328,7 +248,7 @@ const downloadTranscriptAsSubtitle = () => {
     }
   }
 
-  // Add the last subtitle if there are remaining words
+  // Add remaining words if any
   if (currentSubtitle.words.length > 0) {
     subtitles.push({
       start: currentSubtitle.start,
@@ -345,13 +265,17 @@ const downloadTranscriptAsSubtitle = () => {
     srtContent += `${subtitle.text}\n\n`;
   });
 
-  // Download the SRT file
-  const blob = new Blob([srtContent], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
+  downloadFile(srtContent, 'subtitles.srt', 'text/plain');
+};
 
+// Helper function for file downloads
+const downloadFile = (content, filename, type) => {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+
   a.href = url;
-  a.download = 'subtitles.srt';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
 
