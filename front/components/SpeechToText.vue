@@ -1,24 +1,24 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from 'vue';
 
-const hearingTranscript = ref("");
-const deafTranscript = ref("");
+const hearingTranscript = ref('');
+const deafTranscript = ref('');
 const isRecording = ref(false);
 const hearingTranscriptHistory = ref([]);
 const deafTranscriptHistory = ref([]);
-const errorMessage = ref("");
-const selectedLanguage = ref("en-US");
+const errorMessage = ref('');
+const selectedLanguage = ref('en-US');
 
 const languages = ref([
-  { code: "en-US", name: "English" },
-  { code: "ar-SA", name: "Arabic" },
+  { code: 'en-US', name: 'English' },
+  { code: 'ar-SA', name: 'Arabic' },
 ]);
 
 const commands = ref([
-  { phrase: "stop recording", action: () => stopRecording() },
-  { phrase: "clear transcript", action: () => clearTranscript() },
-  { phrase: "توقف عن التسجيل", action: () => stopRecording() },
-  { phrase: "امسح النص", action: () => clearTranscript() },
+  { phrase: 'stop recording', action: () => stopRecording() },
+  { phrase: 'clear transcript', action: () => clearTranscript() },
+  { phrase: 'توقف عن التسجيل', action: () => stopRecording() },
+  { phrase: 'امسح النص', action: () => clearTranscript() },
 ]);
 
 let recognition = null;
@@ -42,7 +42,7 @@ const initializeSpeechRecognition = () => {
 
     if (!Recognition) {
       errorMessage.value =
-        "Speech recognition is not supported in this browser";
+        'Speech recognition is not supported in this browser';
       return;
     }
     recognition = new Recognition();
@@ -62,7 +62,7 @@ const initializeSpeechRecognition = () => {
 // Event handlers (recognition lifecycle)
 const handleStart = () => {
   isRecording.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 };
 
 const handleEnd = () => {
@@ -76,25 +76,25 @@ const handleEnd = () => {
 };
 
 const handleResult = (event) => {
-  let interimTranscript = "";
-  let finalTranscript = "";
+  let interimTranscript = '';
+  let finalTranscript = '';
 
   for (let i = event.resultIndex; i < event.results.length; i++) {
     const result = event.results[i];
     const transcriptText = result[0].transcript.trim();
 
     if (result.isFinal) {
-      finalTranscript += " " + transcriptText;
+      finalTranscript += ' ' + transcriptText;
+      hearingTranscriptHistory.value.push(finalTranscript.trim());
       checkForCommands(transcriptText);
     } else {
-      interimTranscript += " " + transcriptText;
+      interimTranscript += ' ' + transcriptText;
     }
   }
 
   hearingTranscript.value = (
-    hearingTranscriptHistory.value.slice(-3).join(". ") +
-    " " +
-    interimTranscript
+    hearingTranscriptHistory.value.join('. ') +
+    (interimTranscript ? '. ' + interimTranscript : '')
   ).trim();
 };
 
@@ -121,8 +121,8 @@ const stopRecording = () => {
 };
 
 const clearTranscript = () => {
-  hearingTranscript.value = "";
-  deafTranscript.value = "";
+  hearingTranscript.value = '';
+  deafTranscript.value = '';
   hearingTranscriptHistory.value = [];
   deafTranscriptHistory.value = [];
 };
@@ -229,9 +229,9 @@ const changeLanguage = (langCode) => {
               >
                 <p v-if="!hearingTranscript" class="text-gray-400 italic">
                   {{
-                    selectedLanguage === "ar-SA"
-                      ? "سيظهر كلامك هنا..."
-                      : "Speech will appear here..."
+                    selectedLanguage === 'ar-SA'
+                      ? 'سيظهر كلامك هنا...'
+                      : 'Speech will appear here...'
                   }}
                 </p>
                 <p v-else class="text-sm">{{ hearingTranscript }}</p>
@@ -270,9 +270,9 @@ const changeLanguage = (langCode) => {
               >
                 <p v-if="!deafTranscript" class="text-gray-400 italic">
                   {{
-                    selectedLanguage === "ar-SA"
-                      ? "ستظهر لغة الإشارة هنا..."
-                      : "Sign language will appear here..."
+                    selectedLanguage === 'ar-SA'
+                      ? 'ستظهر لغة الإشارة هنا...'
+                      : 'Sign language will appear here...'
                   }}
                 </p>
                 <p v-else class="text-sm">{{ deafTranscript }}</p>
@@ -283,10 +283,7 @@ const changeLanguage = (langCode) => {
 
         <!-- Controls -->
         <div class="mt-6 flex justify-center gap-4">
-          <button
-            @click="toggleMic"
-            class="flex items-center bg-purple-heart-600 text-white px-5 py-2 rounded-full hover:bg-purple-heart-700 transition"
-          >
+          <TheButton class="px-20">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -306,10 +303,37 @@ const changeLanguage = (langCode) => {
               <line x1="12" y1="19" x2="12" y2="23"></line>
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
-            <span>{{ isRecording ? "Stop" : "Start" }} Recording</span>
-          </button>
+            <span>Listen</span>
+          </TheButton>
 
-          <button
+          <TheButton
+            @click="toggleMic"
+            class="flex items-center bg-purple-heart-600 text-white px-5 py-2 rounded-full hover:bg-purple-heart-700 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              :stroke="isRecording ? '#10B981' : 'currentColor'"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <path
+                d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+              ></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            <span v-if="!isRecording">Start Recording</span>
+            <span v-else>Stop</span>
+          </TheButton>
+
+          <TheButton
             @click="clearTranscript"
             class="flex items-center border-2 border-purple-heart-600 text-purple-heart-600 px-5 py-2 rounded-full hover:bg-purple-heart-50 transition"
           >
@@ -330,7 +354,7 @@ const changeLanguage = (langCode) => {
               <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
             </svg>
             <span>Clear</span>
-          </button>
+          </TheButton>
         </div>
 
         <!-- Status indicator -->
@@ -342,7 +366,7 @@ const changeLanguage = (langCode) => {
                 isRecording ? 'text-green-600 font-medium' : 'text-gray-500'
               "
             >
-              {{ isRecording ? "Recording active" : "Recording inactive" }}
+              {{ isRecording ? 'Recording active' : 'Recording inactive' }}
             </span>
           </p>
         </div>
