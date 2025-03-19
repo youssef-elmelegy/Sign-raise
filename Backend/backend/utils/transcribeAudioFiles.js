@@ -101,3 +101,29 @@ function processTranscriptionResult(result) {
     })),
   };
 }
+
+/**
+ * Converts text to speech
+ * @param {string} text - Text to convert to speech
+ */
+export const deepgramSpeak = async (text) => {
+  return deepgram.speak.request(
+    { text },
+    { model: "aura-asteria-en", encoding: "linear16", container: "wav" }
+  );
+};
+
+/**
+ * Converts a stream to an audio buffer
+ * @param {ReadableStream} stream - Readable stream
+ */
+export const getAudioBuffer = async (stream) => {
+  const reader = stream.getReader();
+  const chunks = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks);
+};
