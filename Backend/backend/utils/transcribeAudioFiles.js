@@ -33,12 +33,56 @@ export const transcribeLocalAudio = async (audioBuffer) => {
 };
 
 /**
- * Processes and formats the transcription result
- * @param {object} result - Raw Deepgram API response
+ * Processes and formats the transcription result from the Deepgram API.
+ * @param {object} result - Raw Deepgram API response.
+ * @returns {object} Processed transcription result.
  */
 function processTranscriptionResult(result) {
   const { transcript, confidence, words } =
     result.results.channels[0].alternatives[0];
+
+  const sentences = [];
+  let currentSentence = [];
+  let sentenceStart = words[0]?.start || 0;
+  let sentenceEnd = words[0]?.end || 0;
+  const silenceThreshold = 0.5;
+  const maxDuration = 10;
+
+  for (const [index, word] of words.entries()) {
+    if (index === 0) {
+      currentSentence.push(word);
+      continue;
+    }
+
+    const previousWord = words[index - 1];
+    const gap = word.start - previousWord.end;
+    const potentialDuration = word.end - sentenceStart;
+
+    if (gap > silenceThreshold || potentialDuration >= maxDuration) {
+      sentences.push({
+        start: sentenceStart,
+        end: sentenceEnd,
+        text: currentSentence.map((w) => w.punctuated_word).join(" "),
+        duration: sentenceEnd - sentenceStart,
+      });
+
+      currentSentence = [word];
+      sentenceStart = word.start;
+      sentenceEnd = word.end;
+    } else {
+      currentSentence.push(word);
+      sentenceEnd = word.end;
+    }
+  }
+
+  if (currentSentence.length > 0) {
+    sentences.push({
+      start: sentenceStart,
+      end: sentenceEnd,
+      text: currentSentence.map((w) => w.punctuated_word).join(" "),
+      duration: sentenceEnd - sentenceStart,
+    });
+  }
 
   return {
     metadata: {
@@ -47,12 +91,13 @@ function processTranscriptionResult(result) {
       requestId: result.metadata.request_id,
     },
     transcript,
+    sentences,
     confidence,
-    words: words.map((word) => ({
-      text: word.punctuated_word,
-      start: word.start,
-      end: word.end,
-      confidence: word.confidence,
-    })),
+    // words: words.map((word) => ({
+    //   text: word.punctuated_word,
+    //   start: word.start,
+    //   end: word.end,
+    //   confidence: word.confidence,
+    // })),
   };
 }
