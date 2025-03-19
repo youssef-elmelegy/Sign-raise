@@ -93,11 +93,11 @@ function processTranscriptionResult(result) {
     transcript,
     sentences,
     confidence,
-    // words: words.map((word) => ({
-    //   text: word.punctuated_word,
-    //   start: word.start,
-    //   end: word.end,
-    //   confidence: word.confidence,
-    // })),
+    words: words.map((word) => ({
+      text: word.punctuated_word,
+      start: word.start,
+      end: word.end,
+      confidence: word.confidence,
+    })),
   };
 }
