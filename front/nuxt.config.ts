@@ -1,7 +1,13 @@
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+
 export default defineNuxtConfig({
+  // Disable SSR for TensorFlow compatibility
+  ssr: false,
+
   compatibilityDate: "2024-11-01",
+
   alias: {
     "@": resolve(__dirname, "./"),
   },
@@ -10,16 +16,40 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      nodePolyfills({
+        protocolImports: true,
+      }),
+    ],
+    optimizeDeps: {
+      include: [
+        "@tensorflow/tfjs",
+        "@tensorflow-models/hand-pose-detection",
+        "vue",
+      ],
+    },
   },
 
   build: {
-    transpile: ["@daily-co/daily-js"],
-   },
-
-  devServer: {
-    port: process.env.NUXT_PORT || 3000,
+    transpile: [
+      "@daily-co/daily-js",
+      "@tensorflow/tfjs",
+      "@tensorflow-models/hand-pose-detection",
+      "vue",
+    ],
   },
 
-  modules: ["@nuxt/image"],
+  devServer: {
+    port: process.env.NU ? parseInt(process.env.NU, 10) : undefined,
+  },
+
+  modules: ["@nuxt/image", "@pinia/nuxt"],
+
+  // Required for TensorFlow.js in Nuxt
+  nitro: {
+    externals: {
+      inline: ["@tensorflow/tfjs"],
+    },
+  },
 });
