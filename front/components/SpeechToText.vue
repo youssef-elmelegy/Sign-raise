@@ -8,6 +8,7 @@ const hearingTranscriptHistory = ref([]);
 const deafTranscriptHistory = ref([]);
 const errorMessage = ref('');
 const selectedLanguage = ref('en-US');
+const isPlaying = ref(false);
 
 const languages = ref([
   { code: 'en-US', name: 'English' },
@@ -55,7 +56,6 @@ const initializeSpeechRecognition = () => {
     recognition.onerror = handleError;
   } catch (err) {
     errorMessage.value = `Error initializing speech recognition: ${err.message}`;
-    console.error(err);
   }
 };
 
@@ -148,6 +148,40 @@ const toggleMic = () => {
 
 const changeLanguage = (langCode) => {
   selectedLanguage.value = langCode;
+};
+
+const textToSpeech = async () => {
+  if (!hearingTranscript.value || isPlaying.value) return;
+  try {
+    isPlaying.value = true;
+    
+    const latestTranscript = hearingTranscriptHistory.value.length > 0 
+      ? hearingTranscriptHistory.value[hearingTranscriptHistory.value.length - 1] 
+      : hearingTranscript.value;
+    
+    const response = await apiClient.post(
+      '/api/trans/text-to-voice',
+      { text: latestTranscript },
+      { responseType: 'blob' },
+    );
+    const audioBlob = response.data;
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+
+    audio.onended = () => {
+      isPlaying.value = false;
+    };
+    audio.play();
+  } catch (err) {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      errorMessage.value = 'Please log in to play audio';
+    } else {
+      errorMessage.value = `Error playing audio: ${
+        err.response?.data?.error || err.message || 'Failed to play audio'
+      }`;
+    }
+    isPlaying.value = false;
+  }
 };
 </script>
 
@@ -283,7 +317,12 @@ const changeLanguage = (langCode) => {
 
         <!-- Controls -->
         <div class="mt-6 flex justify-center gap-4">
-          <TheButton class="px-20">
+          <TheButton
+            @click="textToSpeech"
+            class="px-20"
+            :disabled="isPlaying || !hearingTranscript"
+            :class="{ 'opacity-50 cursor-not-allowed': !hearingTranscript }"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -303,7 +342,7 @@ const changeLanguage = (langCode) => {
               <line x1="12" y1="19" x2="12" y2="23"></line>
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
-            <span>Listen</span>
+            <span>{{ isPlaying ? 'Playing...' : 'Spelling' }}</span>
           </TheButton>
 
           <TheButton
@@ -316,7 +355,8 @@ const changeLanguage = (langCode) => {
               height="20"
               viewBox="0 0 24 24"
               fill="none"
-              :stroke="isRecording ? '#10B981' : 'currentColor'"
+                stroke="currentColor"
+                :class="isRecording ? 'text-green-500' : ''"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -330,10 +370,10 @@ const changeLanguage = (langCode) => {
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
             <span v-if="!isRecording">Start Recording</span>
-            <span v-else>Stop</span>
+            <span v-else class="text-green-500">Stop</span>
           </TheButton>
 
-          <TheButton
+          <button
             @click="clearTranscript"
             class="flex items-center border-2 border-purple-heart-600 text-purple-heart-600 px-5 py-2 rounded-full hover:bg-purple-heart-50 transition"
           >
@@ -354,7 +394,7 @@ const changeLanguage = (langCode) => {
               <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
             </svg>
             <span>Clear</span>
-          </TheButton>
+          </button>
         </div>
 
         <!-- Status indicator -->
