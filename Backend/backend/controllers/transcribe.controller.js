@@ -1,4 +1,8 @@
-import { transcribeLocalAudio } from "../utils/transcribeAudioFiles.js";
+import {
+  deepgramSpeak,
+  getAudioBuffer,
+  transcribeLocalAudio,
+} from "../utils/transcribeAudioFiles.js";
 
 const allowedTypes = [
   "audio/mpeg",
@@ -30,5 +34,23 @@ export const transcribeFile = async (req, res) => {
   } catch (error) {
     console.error("Server Error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const textToVoice = async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "Text is required" });
+
+    const response = await deepgramSpeak(text);
+
+    const stream = await response.getStream();
+    const audioBuffer = await getAudioBuffer(stream);
+
+    res.setHeader("Content-Type", "audio/wav");
+    res.send(audioBuffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to generate speech" });
   }
 };
