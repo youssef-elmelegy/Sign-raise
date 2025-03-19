@@ -37,6 +37,8 @@ export default defineNuxtConfig({
       "@tensorflow/tfjs",
       "@tensorflow-models/hand-pose-detection",
       "vue",
+      "long",
+      "buffer",
     ],
   },
 

@@ -29,6 +29,8 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
+    "long": "^5.3.1",
     "vite-plugin-node-polyfills": "^0.23.0"
   }
 }

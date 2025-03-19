@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@theme{
+
+@theme {
     --color-purple-heart-50: #edf0ff;
     --color-purple-heart-100: #dfe2ff;
     --color-purple-heart-200: #c5caff;
