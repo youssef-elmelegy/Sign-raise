@@ -8,6 +8,13 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
+  runtimeConfig: {
+    public: {
+      EMAIL_SERVICE_ID: process.env.NUXT_EMAIL_SERVICE_ID,
+      EMAIL_TEMPLATE_ID: process.env.NUXT_EMAIL_TEMPLATE_ID,
+      EMAIL_PUBLIC_KEY: process.env.NUXT_EMAIL_PUBLIC_KEY,
+    }
+  },
 
   vite: {
     plugins: [tailwindcss()],
