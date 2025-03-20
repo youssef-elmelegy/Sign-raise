@@ -77,6 +77,7 @@
                         </div>
                         <div class="mt-4 flex justify-center">
                             <button
+                             @click="$router.push('/features/video-call')"
                                 class="flex items-center bg-purple-heart-600 text-white px-4 py-2 rounded-full hover:bg-purple-heart-700 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -150,6 +151,7 @@
                                     <p class="text-white text-center">"Can you help me find the gate for my flight?"</p>
                                     <div class="flex justify-center mt-2">
                                         <button
+                                         @click="$router.push('/features/camera-translation')"
                                             class="flex items-center bg-purple-heart-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-heart-700 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -229,8 +231,10 @@
                             </svg>
                             <p class="text-gray-600 mb-4">Drag and drop your video or audio file here</p>
                             <button
-                                class="bg-purple-heart-600 text-white px-6 py-2 rounded-lg hover:bg-purple-heart-700 transition">Browse
-                                Files</button>
+                                @click="$router.push('/features/transcription')"
+                                class="bg-purple-heart-600 text-white px-6 py-2 rounded-lg hover:bg-purple-heart-700 transition">
+                                Browse Files
+                            </button>
                         </div>
                         <div class="bg-gray-50 rounded-xl p-4">
                             <div class="flex justify-between items-center mb-4">

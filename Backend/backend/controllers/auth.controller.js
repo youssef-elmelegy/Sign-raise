@@ -21,7 +21,7 @@ export const signup = async (req, res) => {
     }
 
     // Check if the user already exists
-    const userAlreadyExists = await prisma.User.findUnique({
+    const userAlreadyExists = await prisma.user.findUnique({
       where: { email },
     });
     if (userAlreadyExists) {
@@ -50,7 +50,7 @@ export const signup = async (req, res) => {
     });
 
     // Generate token and set cookie
-    generateTokenAndSetCookie(res, newUser.id);
+    // generateTokenAndSetCookie(res, newUser.id);
 
     // Send verification email
     await sendVerificationEmail(email, otp);
