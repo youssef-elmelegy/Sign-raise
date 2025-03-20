@@ -1,8 +1,11 @@
-# Project Name
+# SignRaise
 
-## Description
+SignRaise is an AI-powered accessibility platform designed to bridge communication gaps between deaf and hearing communities. Our solution offers:
+- **Real-time sign language translation** during video calls.
+- **Live camera translation** for on-the-go interactions.
+- **AI-driven transcription** of uploaded audio/video content.
 
-This project is a backend service built with Express.js, Prisma, and other modern technologies. It includes user authentication, password management, and email verification functionalities.
+With an engaging, modern UI and robust backend APIs powered by advanced AI models, SignRaise makes everyday communication more inclusive and accessible for everyone.
 
 ## Technologies Used
 
@@ -20,10 +23,10 @@ This project is a backend service built with Express.js, Prisma, and other moder
 ## Setup
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/yourusername/your-repo-name.git
-    cd your-repo-name
-    ```
+    ```bash
+    git clone https://github.com/youssef-elmelegy/Sign-raise.git
+    cd Sign-raise
+    ``` 
 
 2. Install dependencies:
     ```sh
