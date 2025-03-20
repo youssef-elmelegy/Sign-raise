@@ -15,10 +15,13 @@ With a modern UI and robust backend APIs powered by advanced AI models and third
 - **Tailwind CSS:** Rapid UI development with a custom design using our purple-heart color palette.
 - **Web Speech API:** Utilizes `window.SpeechRecognition || window.webkitSpeechRecognition` for native speech recognition.
 - **EmailJS:** Handling the Contact Us page and sending emails directly from the frontend.
+- **Formwerk:** For creating and managing robust, dynamic forms.
+- **Valibot:** Providing lightweight and flexible form validation.
 
 ### Backend
 - **Express.js:** Building RESTful API endpoints.
 - **Prisma:** Database modeling and querying.
+- **PostgreSQL**: Robust, scalable relational database management system.
 - **bcryptjs & jsonwebtoken:** Secure password hashing and authentication.
 - **dotenv:** Environment variable management.
 - **cors & cookie-parser:** Handling cross-origin requests and cookies.
