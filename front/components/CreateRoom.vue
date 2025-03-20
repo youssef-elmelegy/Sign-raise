@@ -6,6 +6,7 @@ import DailyIframe from '@daily-co/daily-js';
 const privacy = ref('private');
 const name = ref('');
 const roomUrl = ref('');
+const showButton = ref(false);
 const dailyFrameManager = {
   currentFrame: null,
 
@@ -16,7 +17,6 @@ const dailyFrameManager = {
         const frameInstance = DailyIframe.wrap(frame);
         frameInstance.destroy();
       } catch (e) {
-        console.log("Error destroying frame:", e);
         if (frame.parentNode) {
           frame.parentNode.removeChild(frame);
         }
@@ -51,8 +51,6 @@ const createRoom = async () => {
         enable_screenshare: true,
       }
     });
-    console.log(response);
-    console.log(response.data);
     roomUrl.value = response.data.url;
     if (privacy.value === 'private') {
       await getToken(name.value.trim());
@@ -99,6 +97,7 @@ const createRoomFrame = async (roomUrl, token = null) => {
     } else {
       call.join({ url: roomUrl });
     }
+    showButton.value = true;
   } catch (e) {
     console.error("Error in createRoomFrame:", e);
   }

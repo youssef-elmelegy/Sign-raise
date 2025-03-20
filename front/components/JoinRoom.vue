@@ -95,6 +95,28 @@ const createRoomFrame = async (url: string, token?: string) => {
     errorMessage.value = error.message;
   }
 };
+
+function loadCameraFromDaily() {
+  // if (dailyFrameManager.currentFrame) {
+  //   const stream = dailyFrameManager.currentFrame.localVideo();
+    // Retrieve the MediaStream from Daily's call frame.
+  //   const stream = dailyFrameManager.currentFrame.getLocalMediaStream();
+  //   if (stream) {
+  //     const videoElement = document.getElementById("webcam");
+  //     videoElement.srcObject = stream;
+  //     videoElement.play();
+  //     // Start your detection loop once the stream is loaded.
+  //     videoElement.addEventListener("loadeddata", predictWebcam);
+  //   } else {
+  //     console.error("No stream received from Daily call frame.");
+  //   }
+  // } else {
+  //   console.error("Daily call frame is not initialized.");
+  //   console.log(dailyFrameManager.currentFrame)
+  // } else {
+  //   console.error("Daily call frame is not initialized.");
+  // }
+}
 </script>
 
 <template>
@@ -115,5 +137,9 @@ const createRoomFrame = async (url: string, token?: string) => {
         {{ errorMessage }}
       </div>
     </div>
+    <!--    <div v-if="showButton" class="fixed bottom-4 left-4">-->
+<!--    <div class="fixed bottom-4 left-4">-->
+<!--      <TheButton @click="loadRawCameraFromDaily">Load Camera</TheButton>-->
+<!--    </div>-->
   </main>
 </template>
