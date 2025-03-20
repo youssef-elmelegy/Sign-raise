@@ -1,3 +1,30 @@
+<template>
+  <div>
+    <main class="py-8 px-4">
+      <div class="container mx-auto">
+        <div class="max-w-6xl mx-auto">
+          <h1 class="text-3xl font-bold mb-6 text-primary">{{ pageTitle }}</h1>
+
+          <div class="camera-translation-container">
+            <div class="settings-panel">
+              <SettingsMenu />
+            </div>
+            <div class="video-panel">
+              <VideoPlayer :video-url="store.videoUrl" />
+            </div>
+          </div>
+
+          <div v-if="store.translatedText"
+            class="translation-result mt-6 p-4 bg-primary-50 border border-primary-200 rounded-xl">
+            <h2 class="text-lg font-medium text-primary-900 mb-2">Translation</h2>
+            <p class="text-2xl font-medium">{{ store.translatedText }}</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useSeoMeta, useHead } from '#imports';
@@ -7,12 +34,18 @@ import SettingsMenu from '@/components/SettingsMenu.vue';
 
 const store = usePlaygroundStore();
 
-// Using computed for Arabic title instead of Hebrew
-const pageTitle = computed(() => store.language === 'ar' ? 'مترجم الإشارة' : 'Sign Translator');
+// Support multiple languages with fallback to English
+const pageTitle = computed(() => {
+  switch (store.language) {
+    case 'ar': return 'مترجم الإشارة';
+    default: return 'Sign Language Translator';
+  }
+});
 
 // Set both SEO and document title consistently
 useSeoMeta({
-  title: pageTitle
+  title: pageTitle,
+  description: 'Translate sign language in real-time using your camera'
 });
 
 useHead({
@@ -25,45 +58,43 @@ onMounted(() => {
 });
 </script>
 
-<template>
-  <div class="playground-container">
-    <div class="menu-container">
-      <SettingsMenu />
-    </div>
-    <div class="video-container">
-      <VideoPlayer :video-url="store.videoUrl" />
-    </div>
-  </div>
-</template>
-
 <style scoped>
-.playground-container {
-  display: flex;
-  height: calc(100vh - var(--header-height, 0px) - var(--footer-height, 0px));
-}
-
-.menu-container {
-  width: 250px;
-  background: #f4f4f4;
-  overflow-y: auto;
-}
-
-.video-container {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.camera-translation-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  min-height: 550px;
+  background-color: var(--color-background);
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.settings-panel {
+  background-color: var(--color-background-soft);
+  border-right: 1px solid var(--color-border);
+}
+
+.video-panel {
+  position: relative;
+  height: 100%;
+  min-height: 500px;
+}
+
+.translation-result {
+  background-color: var(--color-background-soft);
+  border-color: var(--color-border);
 }
 
 @media (max-width: 768px) {
-  .playground-container {
-    flex-direction: column;
+  .camera-translation-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
 
-  .menu-container {
-    width: 100%;
-    height: auto;
+  .settings-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
   }
 }
 </style>
