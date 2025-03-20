@@ -16,24 +16,21 @@
                                 class="bg-purple-heart-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-700 transition shadow-lg cursor-pointer">
                                 Get Started
                             </button>
-                            <!-- <TheButton>
-                                Get Started
-                            </TheButton> -->
                         </NuxtLink>
-                        <!-- TODO: Replace with actual demo video link -->
-                         <NuxtLink to="/">
-                        <button
-                            class="border-2 border-purple-heart-600 text-purple-heart-600 px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-50 transition cursor-pointer">
-                            Watch Demo
-                        </button>
+                        <NuxtLink to="/">
+                            <button
+                                class="border-2 border-purple-heart-600 text-purple-heart-600 px-8 py-3 rounded-full text-lg font-medium hover:bg-purple-heart-50 transition cursor-pointer">
+                                Watch Demo
+                            </button>
                         </NuxtLink>
                     </div>
                 </div>
                 <div class="md:w-1/2">
                     <div class="relative">
-                        <!-- TODO: Replace with actual image -->
-                        <img src="/placeholder.svg?height=400&width=500"
-                            alt="Sign language translation app demonstration" class="rounded-xl shadow-2xl mx-auto" />
+                        <LazyImage
+                            src="/images/landing6.jpeg"
+                            alt="Sign language translation illustration showing people communicating"
+                            imgClass="rounded-xl shadow-2xl mx-auto" />
                         <div
                             class="absolute -bottom-5 -right-5 bg-purple-heart-600 text-white p-4 rounded-lg shadow-lg">
                             <div class="flex items-center">
@@ -55,3 +52,7 @@
         </div>
     </section>
 </template>
+
+<script setup>
+import LazyImage from './LazyImage.vue';
+</script>
