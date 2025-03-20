@@ -1,4 +1,12 @@
 <script setup lang="ts">
+onMounted(() => {
+  const savedSection = localStorage.getItem('selectedBlogSection');
+  console.log('Loaded section:', savedSection);
+  if (savedSection) {
+    toggleSection(savedSection);
+  }
+});
+
 const sections = ref([
   {
     id: 'resources',
@@ -164,7 +172,7 @@ const testimonials = ref([
     <!-- Main Content -->
     <main class="min-h-screen lg:ml-64 p-8 pt-20">
       <!-- Updated Resources Section -->
-      <div v-if="activeSection === 'resources'" class="space-y-8">
+      <div id="resources" v-if="activeSection === 'resources'" class="space-y-8">
         <h1 class="text-3xl font-bold text-gray-900">Sign Language Learning Resources</h1>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div 
@@ -203,7 +211,7 @@ const testimonials = ref([
       </div>
 
       <!-- Testimonials Section -->
-      <div v-if="activeSection === 'testimonials'" class="space-y-8">
+      <div id="testimonials" v-if="activeSection === 'testimonials'" class="space-y-8">
         <h1 class="text-3xl font-bold text-gray-900">Success Stories</h1>
         <div class="grid md:grid-cols-2 gap-6">
           <div 
@@ -232,7 +240,7 @@ const testimonials = ref([
         </div>
       </div>
 
-      <div v-if="activeSection === 'practice'" class="space-y-8">
+      <div id="practice" v-if="activeSection === 'practice'" class="space-y-8">
         <h1 class="text-3xl font-bold text-gray-900">Practice Sessions</h1>
         <div class="flex flex-col items-center justify-center p-12 text-center">
           <svg class="w-64 h-64 mb-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
