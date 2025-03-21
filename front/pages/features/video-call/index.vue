@@ -1,8 +1,6 @@
 <script setup>
 import CreateRoom from '~/components/CreateRoom.vue';
 import JoinRoom from '~/components/JoinRoom.vue';
-import TheButton from "~/components/TheButton.vue";
-import signLang from "~/components/SignLanguageTracker.vue"
 const tabList = [
   {
     title: 'Create Room',
@@ -63,7 +61,7 @@ async function loadRawCameraFromDaily() {
       </div>
     </div>
     <div class="flex">
-      <sign-lang />
+      <SignLanguageTracker />
     </div>
   </main>
 </template>

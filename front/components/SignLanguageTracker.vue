@@ -5,8 +5,8 @@
     <!-- Canvas to display the processed output -->
     <canvas ref="outputCanvas" class="output-canvas"></canvas>
     <!-- Optional buttons to control webcam, switch camera etc. -->
-    <button @click="enableCam" id="webcamButton">start translate</button>
-    <button @click="switchCamera" id="switch-camera" style="display:none">Switch Camera</button>
+    <TheButton @click="enableCam" id="webcamButton">start translate</TheButton>
+    <TheButton @click="switchCamera" id="switch-camera" style="display:none">Switch Camera</TheButton>
   </div>
 </template>
 

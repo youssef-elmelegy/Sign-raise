@@ -169,3 +169,47 @@ onBeforeUnmount(() => {
   dailyFrameManager.destroyExistingFrames();
 });
 </script>
+<template>
+  <main class="flex-grow">
+    <div class="max-w-lg mx-auto py-12">
+      <h1 class="text-3xl font-bold text-center">
+        Video Call with Live Translation
+      </h1>
+      <p class="text-center text-gray-600 mt-2">
+        Start a video call with live translation
+      </p>
+
+      <div class="flex flex-col justify-center my-4">
+        <div class="flex mb-4 justify-center items-center space-x-4">
+          <div>
+            <InputField
+                v-model="name"
+                id="name"
+                label="Room Name"
+                placeholder="Enter an unique name"
+                @keyup.enter="createRoom"
+            />
+          </div>
+          <div class="flex flex-col items-center">
+            <label for="privacy" class="text-gray-600">Room privacy</label>
+            <select
+                v-model="privacy"
+                id="privacy"
+                class="border border-gray-300 rounded-md px-4 py-1"
+            >
+              <option value="private">Private</option>
+              <option value="public">Public</option>
+            </select>
+          </div>
+        </div>
+        <TheButton @click="createRoom" :disabled="isLoading">
+          {{ isLoading ? 'Creating...' : 'Start Video Call' }}
+        </TheButton>
+      </div>
+
+      <div v-if="errorMessage" class="mt-4 text-center text-red-500">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </main>
+</template>
