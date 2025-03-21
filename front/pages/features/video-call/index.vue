@@ -1,6 +1,8 @@
 <script setup>
 import CreateRoom from '~/components/CreateRoom.vue';
 import JoinRoom from '~/components/JoinRoom.vue';
+import TheButton from "~/components/TheButton.vue";
+import signLang from "~/components/SignLanguageTracker.vue"
 const tabList = [
   {
     title: 'Create Room',
@@ -17,6 +19,23 @@ const selectedTab = ref(tabList[0])
 const setActiveTab = (tab) => {
   console.log(tab)
   selectedTab.value = tab
+}
+async function loadRawCameraFromDaily() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const videoElement = document.createElement('video');
+    videoElement.srcObject = stream;
+    videoElement.autoplay = true;
+    videoElement.style.position = 'fixed';
+    videoElement.style.bottom = '1em';
+    videoElement.style.left = '1em';
+    videoElement.style.width = '375px';
+    videoElement.style.height = '450px';
+    videoElement.style.border = '1px solid black';
+    document.body.appendChild(videoElement);
+  } catch (error) {
+    console.error("Error accessing camera:", error);
+  }
 }
 </script>
 <template>
@@ -42,6 +61,9 @@ const setActiveTab = (tab) => {
       <div class="flex flex-col justify-center my-4">
         <component :is="selectedTab.component" />
       </div>
+    </div>
+    <div class="flex">
+      <sign-lang />
     </div>
   </main>
 </template>

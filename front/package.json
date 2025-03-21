@@ -16,6 +16,7 @@
     "@nuxt/eslint": "^1.2.0",
     "@nuxt/image": "^1.9.0",
     "@tailwindcss/vite": "^4.0.14",
+    "@tensorflow/tfjs-tflite": "^0.0.1-alpha.10",
     "axios": "^1.8.3",
     "eslint": "^9.22.0",
     "nuxt": "^3.16.0",

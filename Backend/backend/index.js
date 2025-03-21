@@ -9,6 +9,7 @@ import transcribeRoutes from "./routes/transcribe.route.js";
 import cookieParser from "cookie-parser";
 import NodeMediaServer from "node-media-server";
 import { specs, config } from "./config/appConfig.js";
+import path from "path";
 
 dotenv.config();
 
@@ -70,6 +71,15 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/daily", dailyRoutes);
 app.use("/api/trans", transcribeRoutes);
+
+app.get('/exported', (req, res) => {
+  res.sendFile(path.join(__dirname, 'exported', 'model.tflite'));
+});
+
+// /word route: Serve the word.tflite file.
+app.get('/word', (req, res) => {
+  res.sendFile(path.join(__dirname, 'exported', 'word.tflite'));
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on ${PORT}`);
