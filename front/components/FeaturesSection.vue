@@ -57,8 +57,8 @@
                             <div class="flex-1 bg-gray-100 rounded-xl overflow-hidden">
                                 <div class="bg-purple-heart-600 text-white text-center py-2">Hearing Person</div>
                                 <div class="p-4">
-                                    <img src="/placeholder.svg?height=150&width=250" alt="Hearing person in video call"
-                                        class="rounded-lg w-full mb-3" />
+                                    <LazyImage src="/images/landingspeaking.jpeg" alt="Hearing person in video call"
+                                        imgClass="rounded-lg w-full mb-3 h-64" />
                                     <div class="bg-white p-3 rounded-lg shadow-md">
                                         <p class="text-sm">"How are you doing today?"</p>
                                     </div>
@@ -67,8 +67,8 @@
                             <div class="flex-1 bg-gray-100 rounded-xl overflow-hidden">
                                 <div class="bg-purple-heart-600 text-white text-center py-2">Deaf Person</div>
                                 <div class="p-4">
-                                    <img src="/placeholder.svg?height=150&width=250"
-                                        alt="Deaf person signing in video call" class="rounded-lg w-full mb-3" />
+                                    <LazyImage src="/images/landingsigning.jpeg" alt="Deaf person signing in video call"
+                                        imgClass="rounded-lg w-full mb-3" />
                                     <div class="bg-white p-3 rounded-lg shadow-md">
                                         <p class="text-sm">"I'm doing great, thanks for asking!"</p>
                                     </div>
@@ -76,7 +76,7 @@
                             </div>
                         </div>
                         <div class="mt-4 flex justify-center">
-                            <button
+                            <button @click="$router.push('/features/video-call')"
                                 class="flex items-center bg-purple-heart-600 text-white px-4 py-2 rounded-full hover:bg-purple-heart-700 transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -144,12 +144,12 @@
                                 </div>
                             </div>
                             <div class="relative bg-gray-100">
-                                <img src="/placeholder.svg?height=500&width=300" alt="Person signing in front of camera"
-                                    class="w-full" />
-                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-4">
+                                <LazyImage src="/images/landing2.jpeg" alt="Person signing in front of camera"
+                                    imgClass="w-full h-full" />
+                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 ">
                                     <p class="text-white text-center">"Can you help me find the gate for my flight?"</p>
                                     <div class="flex justify-center mt-2">
-                                        <button
+                                        <button @click="$router.push('/features/camera-translation')"
                                             class="flex items-center bg-purple-heart-600 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-heart-700 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -228,9 +228,10 @@
                                 <path d="m16 16-4-4-4 4" />
                             </svg>
                             <p class="text-gray-600 mb-4">Drag and drop your video or audio file here</p>
-                            <button
-                                class="bg-purple-heart-600 text-white px-6 py-2 rounded-lg hover:bg-purple-heart-700 transition">Browse
-                                Files</button>
+                            <button @click="$router.push('/features/transcription')"
+                                class="bg-purple-heart-600 text-white px-6 py-2 rounded-lg hover:bg-purple-heart-700 transition">
+                                Browse Files
+                            </button>
                         </div>
                         <div class="bg-gray-50 rounded-xl p-4">
                             <div class="flex justify-between items-center mb-4">
@@ -261,3 +262,7 @@
         </div>
     </section>
 </template>
+
+<script setup>
+import LazyImage from './LazyImage.vue';
+</script>

@@ -1,24 +1,25 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from 'vue';
 
-const hearingTranscript = ref("");
-const deafTranscript = ref("");
+const hearingTranscript = ref('');
+const deafTranscript = ref('');
 const isRecording = ref(false);
 const hearingTranscriptHistory = ref([]);
 const deafTranscriptHistory = ref([]);
-const errorMessage = ref("");
-const selectedLanguage = ref("en-US");
+const errorMessage = ref('');
+const selectedLanguage = ref('en-US');
+const isPlaying = ref(false);
 
 const languages = ref([
-  { code: "en-US", name: "English" },
-  { code: "ar-SA", name: "Arabic" },
+  { code: 'en-US', name: 'English' },
+  { code: 'ar-SA', name: 'Arabic' },
 ]);
 
 const commands = ref([
-  { phrase: "stop recording", action: () => stopRecording() },
-  { phrase: "clear transcript", action: () => clearTranscript() },
-  { phrase: "توقف عن التسجيل", action: () => stopRecording() },
-  { phrase: "امسح النص", action: () => clearTranscript() },
+  { phrase: 'stop recording', action: () => stopRecording() },
+  { phrase: 'clear transcript', action: () => clearTranscript() },
+  { phrase: 'توقف عن التسجيل', action: () => stopRecording() },
+  { phrase: 'امسح النص', action: () => clearTranscript() },
 ]);
 
 let recognition = null;
@@ -42,7 +43,7 @@ const initializeSpeechRecognition = () => {
 
     if (!Recognition) {
       errorMessage.value =
-        "Speech recognition is not supported in this browser";
+        'Speech recognition is not supported in this browser';
       return;
     }
     recognition = new Recognition();
@@ -55,14 +56,13 @@ const initializeSpeechRecognition = () => {
     recognition.onerror = handleError;
   } catch (err) {
     errorMessage.value = `Error initializing speech recognition: ${err.message}`;
-    console.error(err);
   }
 };
 
 // Event handlers (recognition lifecycle)
 const handleStart = () => {
   isRecording.value = true;
-  errorMessage.value = "";
+  errorMessage.value = '';
 };
 
 const handleEnd = () => {
@@ -76,25 +76,25 @@ const handleEnd = () => {
 };
 
 const handleResult = (event) => {
-  let interimTranscript = "";
-  let finalTranscript = "";
+  let interimTranscript = '';
+  let finalTranscript = '';
 
   for (let i = event.resultIndex; i < event.results.length; i++) {
     const result = event.results[i];
     const transcriptText = result[0].transcript.trim();
 
     if (result.isFinal) {
-      finalTranscript += " " + transcriptText;
+      finalTranscript += ' ' + transcriptText;
+      hearingTranscriptHistory.value.push(finalTranscript.trim());
       checkForCommands(transcriptText);
     } else {
-      interimTranscript += " " + transcriptText;
+      interimTranscript += ' ' + transcriptText;
     }
   }
 
   hearingTranscript.value = (
-    hearingTranscriptHistory.value.slice(-3).join(". ") +
-    " " +
-    interimTranscript
+    hearingTranscriptHistory.value.join('. ') +
+    (interimTranscript ? '. ' + interimTranscript : '')
   ).trim();
 };
 
@@ -121,8 +121,8 @@ const stopRecording = () => {
 };
 
 const clearTranscript = () => {
-  hearingTranscript.value = "";
-  deafTranscript.value = "";
+  hearingTranscript.value = '';
+  deafTranscript.value = '';
   hearingTranscriptHistory.value = [];
   deafTranscriptHistory.value = [];
 };
@@ -148,6 +148,40 @@ const toggleMic = () => {
 
 const changeLanguage = (langCode) => {
   selectedLanguage.value = langCode;
+};
+
+const textToSpeech = async () => {
+  if (!hearingTranscript.value || isPlaying.value) return;
+  try {
+    isPlaying.value = true;
+    
+    const latestTranscript = hearingTranscriptHistory.value.length > 0 
+      ? hearingTranscriptHistory.value[hearingTranscriptHistory.value.length - 1] 
+      : hearingTranscript.value;
+    
+    const response = await apiClient.post(
+      '/api/trans/text-to-voice',
+      { text: latestTranscript },
+      { responseType: 'blob' },
+    );
+    const audioBlob = response.data;
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+
+    audio.onended = () => {
+      isPlaying.value = false;
+    };
+    audio.play();
+  } catch (err) {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      errorMessage.value = 'Please log in to play audio';
+    } else {
+      errorMessage.value = `Error playing audio: ${
+        err.response?.data?.error || err.message || 'Failed to play audio'
+      }`;
+    }
+    isPlaying.value = false;
+  }
 };
 </script>
 
@@ -229,9 +263,9 @@ const changeLanguage = (langCode) => {
               >
                 <p v-if="!hearingTranscript" class="text-gray-400 italic">
                   {{
-                    selectedLanguage === "ar-SA"
-                      ? "سيظهر كلامك هنا..."
-                      : "Speech will appear here..."
+                    selectedLanguage === 'ar-SA'
+                      ? 'سيظهر كلامك هنا...'
+                      : 'Speech will appear here...'
                   }}
                 </p>
                 <p v-else class="text-sm">{{ hearingTranscript }}</p>
@@ -270,9 +304,9 @@ const changeLanguage = (langCode) => {
               >
                 <p v-if="!deafTranscript" class="text-gray-400 italic">
                   {{
-                    selectedLanguage === "ar-SA"
-                      ? "ستظهر لغة الإشارة هنا..."
-                      : "Sign language will appear here..."
+                    selectedLanguage === 'ar-SA'
+                      ? 'ستظهر لغة الإشارة هنا...'
+                      : 'Sign language will appear here...'
                   }}
                 </p>
                 <p v-else class="text-sm">{{ deafTranscript }}</p>
@@ -283,9 +317,11 @@ const changeLanguage = (langCode) => {
 
         <!-- Controls -->
         <div class="mt-6 flex justify-center gap-4">
-          <button
-            @click="toggleMic"
-            class="flex items-center bg-purple-heart-600 text-white px-5 py-2 rounded-full hover:bg-purple-heart-700 transition"
+          <TheButton
+            @click="textToSpeech"
+            class="px-20"
+            :disabled="isPlaying || !hearingTranscript"
+            :class="{ 'opacity-50 cursor-not-allowed': !hearingTranscript }"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -306,8 +342,36 @@ const changeLanguage = (langCode) => {
               <line x1="12" y1="19" x2="12" y2="23"></line>
               <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
-            <span>{{ isRecording ? "Stop" : "Start" }} Recording</span>
-          </button>
+            <span>{{ isPlaying ? 'Playing...' : 'Spelling' }}</span>
+          </TheButton>
+
+          <TheButton
+            @click="toggleMic"
+            class="flex items-center bg-purple-heart-600 text-white px-5 py-2 rounded-full hover:bg-purple-heart-700 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+                stroke="currentColor"
+                :class="isRecording ? 'text-green-500' : ''"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mr-2"
+            >
+              <path
+                d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+              ></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            <span v-if="!isRecording">Start Recording</span>
+            <span v-else class="text-green-500">Stop</span>
+          </TheButton>
 
           <button
             @click="clearTranscript"
@@ -342,7 +406,7 @@ const changeLanguage = (langCode) => {
                 isRecording ? 'text-green-600 font-medium' : 'text-gray-500'
               "
             >
-              {{ isRecording ? "Recording active" : "Recording inactive" }}
+              {{ isRecording ? 'Recording active' : 'Recording inactive' }}
             </span>
           </p>
         </div>

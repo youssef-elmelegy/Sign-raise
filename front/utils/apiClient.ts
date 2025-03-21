@@ -1,3 +1,4 @@
+// utils/apiClient.ts
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -23,8 +24,12 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle token expiration
-    if (error.response.status === 401 && !originalRequest._retry) {
+    // FIX: Check if error.response exists before accessing its properties
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -47,6 +52,24 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // Create a more informative error message
+    let errorMessage = "Network error or request failed";
+    if (error.response) {
+      // Server responded with an error status
+      errorMessage =
+        error.response.data?.error || `Error: ${error.response.status}`;
+    } else if (error.request) {
+      // Request was made but no response received
+      errorMessage = "No response received from server";
+      if (error.code === "ECONNABORTED") {
+        errorMessage = "Request timed out";
+      }
+    } else {
+      // Something else happened while setting up the request
+      errorMessage = error.message;
+    }
+
+    error.displayMessage = errorMessage;
     return Promise.reject(error);
   }
 );

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import DailyIframe from '@daily-co/daily-js';
 import apiClient from '~/utils/apiClient.js';
 import InputField from '@/components/InputField.vue';
@@ -8,52 +8,114 @@ import TheButton from '@/components/TheButton.vue';
 const name = ref('');
 const errorMessage = ref('');
 const roomUrl = ref('');
+const isLoading = ref(false);
 
 const dailyFrameManager = {
   currentFrame: null as DailyIframe | null,
 
   destroyExistingFrames() {
-    const existingFrames = document.querySelectorAll('iframe[data-daily-frame]');
-    existingFrames.forEach(frame => {
+    if (this.currentFrame) {
       try {
-        const frameInstance = DailyIframe.wrap(frame);
-        frameInstance.destroy();
+        this.currentFrame.destroy();
       } catch (e) {
-        console.error("Error destroying frame:", e);
+        console.error('Error destroying frame:', e);
+      }
+      this.currentFrame = null;
+    }
+    document.querySelectorAll('iframe[data-daily-frame]').forEach((frame) => {
+      try {
         frame.parentNode?.removeChild(frame);
+      } catch (e) {
+        console.error('Error removing iframe:', e);
       }
     });
-    this.currentFrame = null;
   },
 
   async createFrame(options: DailyIframe.Properties) {
     this.destroyExistingFrames();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     const frame = DailyIframe.createFrame(options);
     this.currentFrame = frame;
     return frame;
-  }
+  },
+};
+
+// Setup event listeners that properly handle cleanup
+const setupCallEvents = (call: DailyIframe) => {
+  dailyFrameManager.currentFrame = call;
+  const eventsThatCleanup = [
+    'left-meeting',
+    'room:left',
+    'call-ended',
+    'participant-left',
+  ];
+
+  eventsThatCleanup.forEach((eventName) => {
+    call.on(eventName, () => {
+      console.log(`${eventName} event Done`);
+      dailyFrameManager.destroyExistingFrames();
+    });
+  });
+
+  call.on('error', (error: any) => {
+    console.error('Daily.co error:', error);
+    errorMessage.value = error.errorMsg || 'Call error occurred';
+    dailyFrameManager.destroyExistingFrames();
+  });
+
+  return call;
 };
 
 const joinRoom = async () => {
   try {
     errorMessage.value = '';
+    isLoading.value = true;
     const roomName = name.value.trim();
 
     if (!roomName) {
       errorMessage.value = 'Please enter a room name';
+      isLoading.value = false;
       return;
     }
 
     const response = await apiClient.get(`api/daily/room/${roomName}`);
     const roomData = response.data;
 
-    const res = await apiClient.post('api/daily/roomToken');
-    const token = res.data.token;
-    await createRoomFrame(roomData.url, token);
+    // Get token
+    try {
+      const res = await apiClient.post('api/daily/roomToken');
+      const token = res.data.token;
+      await createRoomFrame(roomData.url, token);
+    } catch (tokenError: any) {
+      console.error('Error getting token:', tokenError);
+
+      if (
+        tokenError.response?.status === 401 ||
+        tokenError.response?.status === 403
+      ) {
+        errorMessage.value = 'Please log in to join this room.';
+      } else {
+        errorMessage.value =
+          tokenError.response?.data?.message || 'Failed to get access token';
+      }
+
+      dailyFrameManager.destroyExistingFrames();
+    }
   } catch (error: any) {
-    console.error("Error joining room:", error);
-    errorMessage.value = error.response?.data?.message || error.message;
+    console.error('Error joining room:', error);
+
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      errorMessage.value = 'Please log in to join a room.';
+    } else if (error.response?.status === 404) {
+      errorMessage.value = `Room "${name.value.trim()}" does not exist.`;
+    } else {
+      errorMessage.value =
+        error.response?.data?.message || error.message || 'Failed to join room';
+    }
+
+    dailyFrameManager.destroyExistingFrames();
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -75,24 +137,21 @@ const createRoomFrame = async (url: string, token?: string) => {
       showFullscreenButton: true,
     });
 
-    call.on('error', (error) => {
-      console.error("Daily.co error:", error);
-      errorMessage.value = error.errorMsg;
-    });
+    setupCallEvents(call);
 
-    call.on('room:joined', () => {
-      console.log('Successfully joined room');
-    });
-
-    call.on('room:left', () => {
-      console.log('Left room');
-      dailyFrameManager.destroyExistingFrames();
-    });
-
+    // Join the room
     await call.join({ url, token });
   } catch (error: any) {
-    console.error("Error creating room frame:", error);
-    errorMessage.value = error.message;
+    console.error('Error creating room frame:', error);
+
+    if (error.message?.includes('permission')) {
+      errorMessage.value =
+        'Permission denied. You may not have access to this room.';
+    } else {
+      errorMessage.value = error.message || 'Failed to create call frame';
+    }
+
+    dailyFrameManager.destroyExistingFrames();
   }
 };
 
@@ -117,6 +176,16 @@ function loadCameraFromDaily() {
   //   console.error("Daily call frame is not initialized.");
   // }
 }
+
+// Lifecycle hooks for cleanup
+onMounted(() => {
+  dailyFrameManager.destroyExistingFrames();
+});
+
+onBeforeUnmount(() => {
+  dailyFrameManager.destroyExistingFrames();
+});
+
 </script>
 
 <template>
@@ -125,13 +194,15 @@ function loadCameraFromDaily() {
       <h1 class="text-3xl font-bold text-center">Join Room</h1>
       <div class="space-y-4 mt-6">
         <InputField
-            v-model="name"
-            id="name"
-            label="Room Name"
-            placeholder="Enter room name"
-            @keyup.enter="joinRoom"
+          v-model="name"
+          id="name"
+          label="Room Name"
+          placeholder="Enter room name"
+          @keyup.enter="joinRoom"
         />
-        <TheButton @click="joinRoom" class="w-full">Join Room</TheButton>
+        <TheButton @click="joinRoom" :disabled="isLoading" class="w-full">
+          {{ isLoading ? 'Joining...' : 'Join Room' }}
+        </TheButton>
       </div>
       <div v-if="errorMessage" class="mt-4 text-center text-red-500">
         {{ errorMessage }}

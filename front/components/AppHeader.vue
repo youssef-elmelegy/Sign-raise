@@ -220,7 +220,7 @@ async function checkAuth() {
         // If no token in storage, try the backend's auth checking endpoint
         // Use the endpoint name that exists in backend (chechAuth) نايس ولع
         try {
-            const response = await apiClient.get('/api/auth/chechAuth')
+            const response = await apiClient.get('/api/auth/check-auth')
 
             if (response.data.success) {
                 isAuthenticated.value = true
@@ -244,35 +244,35 @@ async function checkAuth() {
     }
 }
 // ربنا يولي من يصلح
-// async function fetchUserInfo() {
-//     try {
-//         // Try to get cached user info first
-//         const cachedUserInfo = sessionStorage.getItem('userInfo')
-//         if (cachedUserInfo) {
-//             const userInfo = JSON.parse(cachedUserInfo)
-//             userName.value = userInfo.name || 'User'
-//             return
-//         }
+async function fetchUserInfo() {
+    try {
+        // Try to get cached user info first
+        const cachedUserInfo = sessionStorage.getItem('userInfo')
+        if (cachedUserInfo) {
+            const userInfo = JSON.parse(cachedUserInfo)
+            userName.value = userInfo.name || 'User'
+            return
+        }
 
-//         // If using the backend's auth checking endpoint returns user data, use that
-//         try {
-//             const response = await apiClient.get('/api/auth/chechAuth')
-//             if (response.data.user) {
-//                 userName.value = response.data.user.name || 'User'
-//                 sessionStorage.setItem('userInfo', JSON.stringify(response.data.user))
-//                 return
-//             }
-//         } catch (error) {
-//             console.error('Error fetching user info from auth check:', error)
-//         }
+        // If using the backend's auth checking endpoint returns user data, use that
+        try {
+            const response = await apiClient.get('/api/auth/check-auth')
+            if (response.data.user) {
+                userName.value = response.data.user.name || 'User'
+                sessionStorage.setItem('userInfo', JSON.stringify(response.data.user))
+                return
+            }
+        } catch (error) {
+            console.error('Error fetching user info from auth check:', error)
+        }
 
-//         // Fall back to default
-//         userName.value = 'User'
-//     } catch (error) {
-//         console.error('Error in fetchUserInfo:', error)
-//         userName.value = 'User'
-//     }
-// }
+        // Fall back to default
+        userName.value = 'User'
+    } catch (error) {
+        console.error('Error in fetchUserInfo:', error)
+        userName.value = 'User'
+    }
+}
 
 // Updated logout function
 async function logout() {
